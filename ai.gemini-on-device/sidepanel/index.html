@@ -1,37 +1,166 @@
 <!doctype html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Agentic Advocate - Legal AI Assistant</title>
     <link rel="stylesheet" type="text/css" href="index.css" />
   </head>
   <body>
-    <textarea
-      id="input-prompt"
-      placeholder='Type something, e.g. "Write a haiku about Chrome Extensions"'
-      cols="30"
-      rows="5"
-    ></textarea>
-    <div>
-      <input
-        type="range"
-        id="temperature"
-        name="temperature"
-        min="0"
-        max="2"
-        step="0.01"
-      />
-      <label for="temperature"
-        >Temperature: <span id="label-temperature"></span
-      ></label>
-    </div>
-    <div>
-      <input type="range" id="top-k" name="top-k" min="1" max="8" step="1" />
-      <label for="top-k">Top-k: <span id="label-top-k"></span></label>
-    </div>
-    <button id="button-prompt" class="primary" disabled>Run</button>
-    <button id="button-reset" class="secondary" disabled>Reset</button>
-    <div id="response" class="text" hidden></div>
-    <div id="loading" class="text" hidden><span class="blink">...</span></div>
-    <div id="error" class="text" hidden></div>
+    <header class="header">
+      <h1>🤖 Agentic Advocate</h1>
+      <p>Your AI Legal Assistant</p>
+      <div id="ai-status" class="status-indicator">
+        <span id="status-text">Checking AI availability...</span>
+        <div id="status-dot" class="status-dot"></div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Task Selection -->
+      <section class="task-section">
+        <h3>Legal AI Tasks</h3>
+        <div class="task-buttons">
+          <button class="task-btn" data-task="legalAnalysis">📋 Legal Analysis</button>
+          <button class="task-btn" data-task="summarize">📄 Summarize Document</button>
+          <button class="task-btn" data-task="rewrite">✍️ Rewrite Legal Text</button>
+          <button class="task-btn" data-task="proofread">🔍 Proofread</button>
+          <button class="task-btn" data-task="generateDocument">📝 Generate Document</button>
+          <button class="task-btn" data-task="complianceCheck">⚖️ Compliance Check</button>
+        </div>
+      </section>
+
+      <!-- Page Content Capture -->
+      <section class="capture-section">
+        <h3>Page Content</h3>
+        <div class="capture-buttons">
+          <button id="capture-selection" class="capture-btn">📋 Capture Selection</button>
+          <button id="capture-page" class="capture-btn">🌐 Capture Page Content</button>
+          <button id="detect-forms" class="capture-btn">📝 Detect Legal Forms</button>
+        </div>
+        <div id="captured-content" class="captured-content" hidden>
+          <h4>Captured Content:</h4>
+          <div id="content-preview" class="content-preview"></div>
+          <button id="clear-content" class="secondary-btn">Clear</button>
+        </div>
+      </section>
+
+      <!-- Input Area -->
+      <section class="input-section">
+        <h3>Your Request</h3>
+        <textarea
+          id="input-prompt"
+          placeholder="Describe your legal task or paste text for analysis..."
+          rows="4"
+        ></textarea>
+        
+        <!-- AI Parameters (Advanced) -->
+        <details class="advanced-controls">
+          <summary>Advanced Settings</summary>
+          <div class="control-group">
+            <label for="temperature">
+              Legal Precision: <span id="label-temperature"></span>
+            </label>
+            <input
+              type="range"
+              id="temperature"
+              name="temperature"
+              min="0"
+              max="1"
+              step="0.1"
+              value="0.3"
+            />
+            <small>Lower = more consistent legal advice</small>
+          </div>
+          
+          <div class="control-group">
+            <label for="top-k">
+              Response Variety: <span id="label-top-k"></span>
+            </label>
+            <input type="range" id="top-k" name="top-k" min="1" max="5" step="1" value="3" />
+            <small>Lower = more focused responses</small>
+          </div>
+        </details>
+      </section>
+
+      <!-- Action Buttons -->
+      <section class="action-section">
+        <button id="button-process" class="primary-btn" disabled>
+          <span id="process-icon">🤖</span>
+          <span id="process-text">Process with AI</span>
+        </button>
+        <button id="button-reset" class="secondary-btn" disabled>🔄 Reset Session</button>
+      </section>
+
+      <!-- Response Area -->
+      <section class="response-section">
+        <div id="loading" class="loading-indicator" hidden>
+          <div class="spinner"></div>
+          <span>Processing with AI...</span>
+        </div>
+        
+        <div id="response" class="response-content" hidden>
+          <div class="response-header">
+            <h3>AI Response</h3>
+            <div class="response-actions">
+              <button id="copy-response" class="icon-btn" title="Copy to clipboard">📋</button>
+              <button id="save-response" class="icon-btn" title="Save to storage">💾</button>
+              <button id="export-response" class="icon-btn" title="Export as document">📄</button>
+            </div>
+          </div>
+          <div id="response-content" class="response-text"></div>
+        </div>
+        
+        <div id="error" class="error-message" hidden>
+          <div class="error-header">⚠️ Error</div>
+          <div id="error-content" class="error-text"></div>
+          <div class="error-actions">
+            <button id="retry-request" class="primary-btn">🔄 Retry</button>
+            <button id="report-error" class="secondary-btn">📝 Report Issue</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Legal Forms Detection -->
+      <section class="forms-section" id="forms-section" hidden>
+        <h3>🔍 Legal Forms Detected</h3>
+        <div id="detected-forms" class="detected-forms"></div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="quick-actions">
+        <h3>Quick Legal Actions</h3>
+        <div class="quick-action-grid">
+          <button class="quick-action" data-action="rti-help">
+            📋 RTI Application Help
+          </button>
+          <button class="quick-action" data-action="complaint-draft">
+            📝 Draft Complaint
+          </button>
+          <button class="quick-action" data-action="legal-notice">
+            ⚖️ Legal Notice Template
+          </button>
+          <button class="quick-action" data-action="tax-planning">
+            💰 Tax Planning Advice
+          </button>
+          <button class="quick-action" data-action="contract-review">
+            📋 Contract Review
+          </button>
+          <button class="quick-action" data-action="compliance-check">
+            ✅ Compliance Check
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-info">
+        <small>
+          🔒 Privacy-first: All processing happens locally on your device<br>
+          ⚡ Powered by Chrome's built-in Gemini Nano AI
+        </small>
+      </div>
+    </footer>
+
     <script src="index.js" type="module"></script>
   </body>
 </html>
