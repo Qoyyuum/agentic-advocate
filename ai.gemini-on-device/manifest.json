@@ -1,13 +1,19 @@
 {
-  "name": "Chrome Prompt AI Demo",
-  "version": "0.2",
+  "name": "Agentic Advocate - AI Assistant",
+  "version": "0.3",
   "manifest_version": 3,
-  "description": "Try Chrome's built-in prompt API built with Gemini Nano.",
+  "description": "Privacy-first Chrome extension powered by Gemini Nano for summarization, writing, rewriting, and chat capabilities.",
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["sidePanel"],
-  "minimum_chrome_version": "138",
+  "permissions": ["sidePanel", "storage", "activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "minimum_chrome_version": "128",
   "side_panel": {
     "default_path": "sidepanel/index.html"
   },
@@ -18,6 +24,6 @@
       "48": "images/icon48.png",
       "128": "images/icon128.png"
     },
-    "default_title": "Open Chat Interface"
+    "default_title": "Open Agentic Advocate AI"
   }
 }

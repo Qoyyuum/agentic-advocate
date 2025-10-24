@@ -4,7 +4,31 @@ body {
   color: #1f1f1f;
   background-color: #f2f2f2;
   font-size: 16px;
-  padding: 8px;
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 24px;
+  margin: 0 0 16px 0;
+  color: #333;
+}
+
+h2 {
+  font-size: 18px;
+  margin: 0 0 8px 0;
+  color: #555;
+}
+
+h3 {
+  font-size: 16px;
+  margin: 0 0 8px 0;
+  color: #666;
+}
+
+.section {
+  margin-bottom: 16px;
 }
 
 input,
@@ -15,6 +39,15 @@ select {
   font-size: inherit;
 }
 
+select.mode-selector {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid #333;
+  background-color: white;
+  cursor: pointer;
+}
+
 button {
   background: #333;
   color: white;
@@ -22,8 +55,14 @@ button {
   border: none;
   min-width: 100px;
   padding: 8px;
-  margin: 16px 0;
+  margin: 8px 4px;
   cursor: pointer;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
 }
 
 button.primary {
@@ -79,4 +118,19 @@ textarea {
 
 [hidden] {
   display: none;
+}
+
+.info-box {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  border-left: 4px solid #1565c0;
+}
+
+.error-box {
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #c62828;
 }

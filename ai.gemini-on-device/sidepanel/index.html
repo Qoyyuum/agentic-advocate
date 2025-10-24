@@ -4,34 +4,62 @@
     <link rel="stylesheet" type="text/css" href="index.css" />
   </head>
   <body>
-    <textarea
-      id="input-prompt"
-      placeholder='Type something, e.g. "Write a haiku about Chrome Extensions"'
-      cols="30"
-      rows="5"
-    ></textarea>
-    <div>
-      <input
-        type="range"
-        id="temperature"
-        name="temperature"
-        min="0"
-        max="2"
-        step="0.01"
-      />
-      <label for="temperature"
-        >Temperature: <span id="label-temperature"></span
-      ></label>
+    <h1>Agentic Advocate AI</h1>
+    
+    <div class="section">
+      <h2>AI Operation Mode</h2>
+      <select id="operation-mode" class="mode-selector">
+        <option value="prompt">Chat / Prompt</option>
+        <option value="summarize">Summarize</option>
+        <option value="write">Write</option>
+        <option value="rewrite">Rewrite</option>
+      </select>
     </div>
-    <div>
-      <input type="range" id="top-k" name="top-k" min="1" max="8" step="1" />
-      <label for="top-k">Top-k: <span id="label-top-k"></span></label>
+
+    <div class="section">
+      <h2>Input</h2>
+      <div class="button-group">
+        <button id="button-load-selection" class="secondary" style="margin: 0 0 8px 0;">Load Selected Text</button>
+      </div>
+      <textarea
+        id="input-prompt"
+        placeholder='Type something, e.g. "Write a haiku about Chrome Extensions"'
+        cols="30"
+        rows="5"
+      ></textarea>
     </div>
-    <button id="button-prompt" class="primary" disabled>Run</button>
-    <button id="button-reset" class="secondary" disabled>Reset</button>
+
+    <div id="advanced-settings" class="section">
+      <h3>Advanced Settings</h3>
+      <div>
+        <input
+          type="range"
+          id="temperature"
+          name="temperature"
+          min="0"
+          max="2"
+          step="0.01"
+        />
+        <label for="temperature"
+          >Temperature: <span id="label-temperature"></span
+        ></label>
+      </div>
+      <div>
+        <input type="range" id="top-k" name="top-k" min="1" max="8" step="1" />
+        <label for="top-k">Top-k: <span id="label-top-k"></span></label>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button id="button-prompt" class="primary" disabled>Run</button>
+      <button id="button-reset" class="secondary" disabled>Reset</button>
+    </div>
+
+    <div id="capabilities-info" class="info-box" hidden></div>
     <div id="response" class="text" hidden></div>
-    <div id="loading" class="text" hidden><span class="blink">...</span></div>
-    <div id="error" class="text" hidden></div>
+    <div id="loading" class="text" hidden><span class="blink">Processing...</span></div>
+    <div id="error" class="text error-box" hidden></div>
+    
     <script src="index.js" type="module"></script>
   </body>
 </html>
