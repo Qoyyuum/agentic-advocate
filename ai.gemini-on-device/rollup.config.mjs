@@ -19,7 +19,7 @@ export default [
       copy({
         targets: [
           {
-            src: ['manifest.json', 'background.js', 'sidepanel', 'images'],
+            src: ['manifest.json', 'background.js', 'gemini-api.js', 'sidepanel', 'images'],
             dest: 'dist'
           }
         ]
