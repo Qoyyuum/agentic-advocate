@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Agentic Advocate",
+  "version": "1.0.0",
+  "description": "Automating legal, compliance, and tax tasks using Chrome's Built-in AI (Gemini Nano) with privacy-first, offline-capable workflows.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "notifications",
+    "bookmarks",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["scripts/content.js"],
+      "css": ["styles/content.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "pages/popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "pages/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "options_page": "pages/options.html"
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Advocate</title>
+  <link rel="stylesheet" href="../styles/popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1 class="title">🤖 Agentic Advocate</h1>
+        <p class="subtitle">AI-Powered Legal Assistant</p>
+      </div>
+    </header>
+
+    <!-- AI Status -->
+    <div class="status-card">
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Checking AI availability...</span>
+      </div>
+      <div class="status-mode" id="statusMode"></div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h3 class="section-title">Quick Actions</h3>
+      <div class="action-grid">
+        <button class="action-btn" id="analyzePageBtn">
+          <span class="action-icon">📄</span>
+          <span class="action-label">Analyze Page</span>
+        </button>
+        <button class="action-btn" id="legalReviewBtn">
+          <span class="action-icon">⚖️</span>
+          <span class="action-label">Legal Review</span>
+        </button>
+        <button class="action-btn" id="taxPlanningBtn">
+          <span class="action-icon">💰</span>
+          <span class="action-label">Tax Planning</span>
+        </button>
+        <button class="action-btn" id="autoFillBtn">
+          <span class="action-icon">✍️</span>
+          <span class="action-label">Auto-Fill Form</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-section">
+      <h3 class="section-title">AI Chat</h3>
+      <div class="chat-container" id="chatContainer">
+        <div class="chat-message bot-message">
+          <div class="message-content">
+            Hello! I'm your AI legal assistant. How can I help you today?
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-container">
+        <textarea
+          class="chat-input"
+          id="chatInput"
+          placeholder="Ask me anything about legal, compliance, or tax matters..."
+          rows="2"
+        ></textarea>
+        <button class="send-btn" id="sendBtn">
+          <span>Send</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Recent Documents -->
+    <div class="documents-section">
+      <h3 class="section-title">Recent Documents</h3>
+      <div class="documents-list" id="documentsList">
+        <p class="empty-state">No documents yet. Start by analyzing a page or uploading a document.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <button class="footer-link" id="settingsBtn">Settings</button>
+      <button class="footer-link" id="helpBtn">Help</button>
+      <button class="footer-link" id="aboutBtn">About</button>
+    </footer>
+  </div>
+
+  <script src="../scripts/popup.js"></script>
+</body>
+</html>

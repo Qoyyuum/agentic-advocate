@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Advocate - Settings</title>
+  <link rel="stylesheet" href="../styles/options.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>⚙️ Settings</h1>
+      <p>Configure your Agentic Advocate extension</p>
+    </header>
+
+    <main class="main">
+      <!-- AI Settings -->
+      <section class="settings-section">
+        <h2 class="section-title">AI Configuration</h2>
+        <div class="setting-item">
+          <label class="setting-label">
+            <span>AI Processing Mode</span>
+            <select id="aiMode" class="setting-select">
+              <option value="local">Local (Gemini Nano) - Recommended</option>
+              <option value="remote">Remote Fallback</option>
+              <option value="auto">Auto-detect</option>
+            </select>
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="enableAI" class="setting-checkbox" checked>
+            <span>Enable AI Features</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Privacy Settings -->
+      <section class="settings-section">
+        <h2 class="section-title">Privacy & Storage</h2>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="localStorage" class="setting-checkbox" checked>
+            <span>Store data locally (IndexedDB)</span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="saveChatHistory" class="setting-checkbox" checked>
+            <span>Save chat history</span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <button class="danger-btn" id="clearDataBtn">Clear All Data</button>
+        </div>
+      </section>
+
+      <!-- Feature Settings -->
+      <section class="settings-section">
+        <h2 class="section-title">Features</h2>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="legalWorkflows" class="setting-checkbox" checked>
+            <span>Legal Workflows & Document Analysis</span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="taxPlanning" class="setting-checkbox" checked>
+            <span>Tax Planning Assistant</span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="autoFill" class="setting-checkbox" checked>
+            <span>Auto-fill Forms</span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="highlightTerms" class="setting-checkbox">
+            <span>Highlight Legal Terms</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- User Information -->
+      <section class="settings-section">
+        <h2 class="section-title">Personal Information (for Auto-fill)</h2>
+        <div class="setting-item">
+          <label class="setting-label">
+            <span>Full Name</span>
+            <input type="text" id="fullName" class="setting-input" placeholder="John Doe">
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <span>Email</span>
+            <input type="email" id="email" class="setting-input" placeholder="john@example.com">
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <span>Phone</span>
+            <input type="tel" id="phone" class="setting-input" placeholder="+1234567890">
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <span>Address</span>
+            <textarea id="address" class="setting-textarea" placeholder="123 Main St, City, State, ZIP"></textarea>
+          </label>
+        </div>
+      </section>
+
+      <!-- About -->
+      <section class="settings-section">
+        <h2 class="section-title">About</h2>
+        <div class="about-content">
+          <p><strong>Agentic Advocate</strong> v1.0.0</p>
+          <p>AI-powered legal assistant using Chrome Built-in AI</p>
+          <p>Built for Chrome AI Challenge 2025</p>
+          <div class="about-links">
+            <a href="https://github.com/adi0900/Google_Chrome25" target="_blank">GitHub</a>
+            <a href="#" id="privacyLink">Privacy Policy</a>
+            <a href="#" id="licenseLink">License</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Save Button -->
+      <div class="actions">
+        <button class="primary-btn" id="saveBtn">Save Settings</button>
+        <button class="secondary-btn" id="resetBtn">Reset to Defaults</button>
+      </div>
+
+      <!-- Status Message -->
+      <div class="status-message" id="statusMessage"></div>
+    </main>
+  </div>
+
+  <script src="../scripts/options.js"></script>
+</body>
+</html>
