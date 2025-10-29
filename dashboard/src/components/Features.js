@@ -88,12 +88,14 @@ export default function Features() {
                 <Card className="glass-panel-hover h-full group">
                   <CardHeader>
                     <div className={`${feature.color} mb-4 transition-transform group-hover:scale-110 duration-300`}>
-                      <Icon className="w-10 h-10" strokeWidth={2} />
+                      <div className="p-3 rounded-xl bg-opacity-10 inline-block" style={{backgroundColor: `rgba(0, 240, 255, 0.1)`}}>
+                        <Icon className="w-8 h-8 drop-shadow-[0_0_8px_currentColor]" strokeWidth={2} />
+                      </div>
                     </div>
-                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                    <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="text-muted-foreground">
+                    <CardDescription className="text-muted-foreground leading-relaxed">
                       {feature.description}
                     </CardDescription>
                   </CardContent>

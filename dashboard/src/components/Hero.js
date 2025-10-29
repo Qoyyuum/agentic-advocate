@@ -27,8 +27,8 @@ export default function Hero() {
           >
             <div className="relative">
               <div className="absolute inset-0 bg-neon-cyan/20 rounded-full blur-3xl animate-pulse"></div>
-              <div className="relative glass-panel p-6 rounded-full neon-border">
-                <Sparkles className="w-16 h-16 text-neon-cyan" strokeWidth={2} />
+              <div className="relative logo-glass p-6 rounded-2xl animate-glow">
+                <Sparkles className="w-16 h-16 text-neon-cyan drop-shadow-[0_0_12px_rgba(0,240,255,0.8)]" strokeWidth={2} />
               </div>
             </div>
           </motion.div>
@@ -75,17 +75,17 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto"
           >
-            <div className="glass-panel p-4 rounded-lg border border-white/10">
-              <Shield className="w-6 h-6 text-neon-cyan mx-auto mb-2" />
-              <span className="text-sm text-muted-foreground">100% Privacy-First</span>
+            <div className="glass-panel p-6 rounded-xl border border-white/12">
+              <Shield className="w-8 h-8 text-neon-cyan mx-auto mb-3 drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]" />
+              <span className="text-sm font-medium text-foreground">100% Privacy-First</span>
             </div>
-            <div className="glass-panel p-4 rounded-lg border border-white/10">
-              <Wifi className="w-6 h-6 text-neon-purple mx-auto mb-2" />
-              <span className="text-sm text-muted-foreground">Offline Capable</span>
+            <div className="glass-panel p-6 rounded-xl border border-white/12">
+              <Wifi className="w-8 h-8 text-neon-purple mx-auto mb-3 drop-shadow-[0_0_8px_rgba(157,78,221,0.6)]" />
+              <span className="text-sm font-medium text-foreground">Offline Capable</span>
             </div>
-            <div className="glass-panel p-4 rounded-lg border border-white/10">
-              <Code className="w-6 h-6 text-neon-green mx-auto mb-2" />
-              <span className="text-sm text-muted-foreground">Free & Open Source</span>
+            <div className="glass-panel p-6 rounded-xl border border-white/12">
+              <Code className="w-8 h-8 text-neon-green mx-auto mb-3 drop-shadow-[0_0_8px_rgba(0,255,133,0.6)]" />
+              <span className="text-sm font-medium text-foreground">Free & Open Source</span>
             </div>
           </motion.div>
         </motion.div>

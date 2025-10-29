@@ -20,7 +20,7 @@ export default function CTA() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="glass-panel p-12 rounded-2xl border-2 border-white/10 text-center"
+          className="glass-panel p-12 rounded-2xl border-2 border-white/12 text-center"
         >
           {/* Sparkles icon */}
           <motion.div
@@ -32,7 +32,9 @@ export default function CTA() {
           >
             <div className="relative">
               <div className="absolute inset-0 bg-neon-cyan/30 rounded-full blur-2xl"></div>
-              <Sparkles className="relative w-12 h-12 text-neon-cyan" strokeWidth={2} />
+              <div className="relative logo-glass p-4 rounded-2xl animate-glow">
+                <Sparkles className="w-12 h-12 text-neon-cyan drop-shadow-[0_0_12px_rgba(0,240,255,0.8)]" strokeWidth={2} />
+              </div>
             </div>
           </motion.div>
 

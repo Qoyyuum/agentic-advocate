@@ -8,12 +8,12 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="glass-panel sticky top-0 z-50 border-b border-white/10">
+    <header className="glass-panel sticky top-0 z-50 border-b border-white/12">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="relative">
-              <Bot className="w-8 h-8 text-neon-cyan animate-glow" strokeWidth={2} />
+            <div className="logo-glass rounded-xl p-2 animate-glow">
+              <Bot className="w-7 h-7 text-neon-cyan drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]" strokeWidth={2} />
             </div>
             <span className="text-xl font-bold neon-text">Agentic Advocate</span>
           </div>

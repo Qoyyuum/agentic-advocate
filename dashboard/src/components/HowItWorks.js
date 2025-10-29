@@ -80,10 +80,10 @@ export default function HowItWorks() {
                     className="relative mb-6"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 rounded-full blur-xl"></div>
-                    <div className={`relative w-20 h-20 rounded-full glass-panel neon-border flex items-center justify-center ${step.color} group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className="w-8 h-8" strokeWidth={2} />
+                    <div className={`relative w-20 h-20 rounded-full logo-glass flex items-center justify-center ${step.color} hover:scale-110 transition-all duration-300`}>
+                      <Icon className="w-8 h-8 drop-shadow-[0_0_8px_currentColor]" strokeWidth={2} />
                     </div>
-                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-card border border-white/20 flex items-center justify-center text-xs font-bold">
+                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full glass-panel border border-white/20 flex items-center justify-center text-xs font-bold neon-text">
                       {step.number}
                     </div>
                   </motion.div>

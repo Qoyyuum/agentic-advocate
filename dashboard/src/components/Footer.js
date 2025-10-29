@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 
 export default function Footer() {
   return (
-    <footer id="about" className="relative border-t border-white/10">
+    <footer id="about" className="relative border-t border-white/12">
       {/* Glass effect background */}
       <div className="absolute inset-0 glass-panel"></div>
 
@@ -20,9 +20,8 @@ export default function Footer() {
             className="col-span-1 md:col-span-2"
           >
             <div className="flex items-center space-x-3 mb-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-neon-cyan/20 rounded-full blur-xl"></div>
-                <Bot className="relative w-8 h-8 text-neon-cyan" strokeWidth={2} />
+              <div className="logo-glass p-2 rounded-xl">
+                <Bot className="w-7 h-7 text-neon-cyan drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]" strokeWidth={2} />
               </div>
               <span className="text-xl font-bold neon-text">Agentic Advocate</span>
             </div>
@@ -126,7 +125,7 @@ export default function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4"
+          className="border-t border-white/12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <p className="text-muted-foreground text-sm">
             © 2025 Agentic Advocate. All rights reserved.

@@ -90,6 +90,16 @@ module.exports = {
           "0%, 100%": { boxShadow: "0 0 20px rgba(0, 240, 255, 0.5)" },
           "50%": { boxShadow: "0 0 40px rgba(0, 240, 255, 0.8)" },
         },
+        logoGlow: {
+          "0%, 100%": {
+            borderColor: "rgba(0, 240, 255, 0.3)",
+            boxShadow: "0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05)"
+          },
+          "50%": {
+            borderColor: "rgba(0, 240, 255, 0.6)",
+            boxShadow: "0 0 30px rgba(0, 240, 255, 0.4), inset 0 0 30px rgba(0, 240, 255, 0.1)"
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -98,6 +108,7 @@ module.exports = {
         fadeIn: "fadeIn 0.6s ease-out",
         slideIn: "slideIn 0.6s ease-out",
         glow: "glow 2s ease-in-out infinite",
+        logoGlow: "logoGlow 2s ease-in-out infinite",
       },
       backdropBlur: {
         xs: '2px',

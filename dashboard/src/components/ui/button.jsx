@@ -16,8 +16,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        neon: "bg-gradient-to-r from-neon-cyan to-neon-purple text-black font-bold hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] transition-all duration-300",
-        glass: "glass-panel text-foreground hover:bg-card/50 hover:border-white/20",
+        neon: "neon-btn rounded-lg hover:-translate-y-0.5",
+        glass: "glass-panel-hover text-foreground",
       },
       size: {
         default: "h-10 px-4 py-2",
