@@ -32,9 +32,9 @@ function initIcons() {
   document.getElementById('documentsIcon').appendChild(createIcon('fileText', 16));
 
   // Footer icons
-  document.getElementById('settingsIcon').appendChild(createIcon('settings', 16));
+  document.getElementById('teamIcon').appendChild(createIcon('users', 16));
   document.getElementById('helpIcon').appendChild(createIcon('helpCircle', 16));
-  document.getElementById('infoIcon').appendChild(createIcon('info', 16));
+  document.getElementById('githubIcon').appendChild(createIcon('github', 16));
 }
 
 // Initialize popup
@@ -63,17 +63,21 @@ async function checkAIStatus() {
   }
 }
 
+// Debounce helper
+let sendMessageTimeout = null;
+let isProcessing = false;
+
 // Setup event listeners
 function setupEventListeners() {
   // Chat input
   const chatInput = document.getElementById('chatInput');
   const sendBtn = document.getElementById('sendBtn');
 
-  sendBtn.addEventListener('click', sendMessage);
+  sendBtn.addEventListener('click', () => debouncedSendMessage());
   chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      debouncedSendMessage();
     }
   });
 
@@ -84,9 +88,19 @@ function setupEventListeners() {
   document.getElementById('autoFillBtn').addEventListener('click', autoFillForm);
 
   // Footer links
-  document.getElementById('settingsBtn').addEventListener('click', openSettings);
+  document.getElementById('teamBtn').addEventListener('click', openTeam);
   document.getElementById('helpBtn').addEventListener('click', openHelp);
-  document.getElementById('aboutBtn').addEventListener('click', openAbout);
+  document.getElementById('githubBtn').addEventListener('click', openGithub);
+}
+
+// Debounced send message to prevent rapid multiple AI responses
+function debouncedSendMessage() {
+  if (isProcessing) return;
+
+  clearTimeout(sendMessageTimeout);
+  sendMessageTimeout = setTimeout(() => {
+    sendMessage();
+  }, 300);
 }
 
 // Send chat message
@@ -94,11 +108,17 @@ function sendMessage() {
   const chatInput = document.getElementById('chatInput');
   const message = chatInput.value.trim();
 
-  if (!message) return;
+  if (!message || isProcessing) return;
+
+  // Set processing flag
+  isProcessing = true;
 
   // Add user message to chat
   addMessageToChat(message, 'user');
   chatInput.value = '';
+
+  // Save to chat history
+  saveChatMessage(message, 'user');
 
   // Process with AI
   chrome.runtime.sendMessage({
@@ -113,15 +133,22 @@ function sendMessage() {
     } else {
       addMessageToChat('Sorry, I encountered an error processing your request.', 'bot');
     }
-  });
 
-  // Save to chat history
-  saveChatMessage(message, 'user');
+    // Reset processing flag
+    isProcessing = false;
+  });
 }
 
 // Add message to chat container
-function addMessageToChat(message, type) {
+function addMessageToChat(message, type, shouldSave = true) {
   const chatContainer = document.getElementById('chatContainer');
+
+  // Limit to 5 messages - remove oldest if exceeding
+  const messages = chatContainer.querySelectorAll('.chat-message');
+  if (messages.length >= 5) {
+    chatContainer.removeChild(messages[0]);
+  }
+
   const messageDiv = document.createElement('div');
   messageDiv.className = `chat-message ${type}-message`;
 
@@ -138,10 +165,13 @@ function addMessageToChat(message, type) {
   messageDiv.appendChild(contentDiv);
   chatContainer.appendChild(messageDiv);
 
-  // Scroll to bottom
-  chatContainer.scrollTop = chatContainer.scrollHeight;
+  // Smooth scroll to bottom
+  chatContainer.scrollTo({
+    top: chatContainer.scrollHeight,
+    behavior: 'smooth'
+  });
 
-  if (type === 'bot') {
+  if (type === 'bot' && shouldSave) {
     saveChatMessage(message, 'bot');
   }
 }
@@ -157,9 +187,9 @@ function loadChatHistory() {
       chatContainer.innerHTML = '';
     }
 
-    // Load last 10 messages
-    history.slice(-10).forEach(msg => {
-      addMessageToChat(msg.text, msg.type);
+    // Load last 5 messages only (limit to 3-5 chat bubbles)
+    history.slice(-5).forEach(msg => {
+      addMessageToChat(msg.text, msg.type, false);
     });
   });
 }
@@ -250,17 +280,17 @@ function openDocument(doc) {
   // TODO: Implement document viewer
 }
 
-// Open settings page
-function openSettings() {
-  chrome.runtime.openOptionsPage();
+// Open team page
+function openTeam() {
+  chrome.tabs.create({ url: 'https://github.com/adi0900' });
 }
 
 // Open help
 function openHelp() {
-  chrome.tabs.create({ url: 'https://github.com/adi0900/Google_Chrome25' });
+  chrome.runtime.openOptionsPage();
 }
 
-// Open about
-function openAbout() {
-  addMessageToChat('Agentic Advocate v1.0.0 - Built for Chrome AI Challenge 2025. Privacy-focused legal assistant powered by Chrome Built-in AI.', 'bot');
+// Open Github repo
+function openGithub() {
+  chrome.tabs.create({ url: 'https://github.com/adi0900/Google_Chrome25' });
 }

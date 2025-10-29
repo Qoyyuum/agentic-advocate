@@ -1,12 +1,13 @@
 /* Options Page Styles for Agentic Advocate Extension - Dark Premium Black Theme */
 
 :root {
-  --background: #0f0f11;
-  --foreground: #fafafa;
-  --card: #18181b;
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-  --border: rgba(255, 255, 255, 0.1);
+  --background: #0a0a0c;
+  --foreground: #f5f5f7;
+  --card: #111113;
+  --card-hover: #18181b;
+  --muted: #1f1f23;
+  --muted-foreground: #b4b4b8;
+  --border: rgba(255, 255, 255, 0.12);
   --neon-cyan: #00F0FF;
   --neon-purple: #9D4EDD;
   --neon-pink: #FF006E;
@@ -47,7 +48,7 @@ html.dark body {
 
 /* Glass Panel */
 .glass-panel {
-  background: rgba(24, 24, 27, 0.4);
+  background: rgba(17, 17, 19, 0.5);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
@@ -56,7 +57,7 @@ html.dark body {
 
 /* Glass Input */
 .glass-input {
-  background: rgba(24, 24, 27, 0.3);
+  background: rgba(17, 17, 19, 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--border);
@@ -67,8 +68,8 @@ html.dark body {
 .glass-input:focus {
   outline: none;
   border-color: var(--neon-cyan);
-  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1), 0 0 20px rgba(0, 240, 255, 0.2);
-  background: rgba(24, 24, 27, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15), 0 0 20px rgba(0, 240, 255, 0.3);
+  background: rgba(24, 24, 27, 0.6);
 }
 
 /* Neon Text */
@@ -91,18 +92,51 @@ html.dark body {
 }
 
 .header-icon {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: glow 2s ease-in-out infinite;
+  background: rgba(0, 240, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 16px;
+  animation: logoGlow 2s ease-in-out infinite;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05);
+}
+
+.header-icon::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.5;
 }
 
 .header-icon svg {
   color: var(--neon-cyan);
   width: 40px;
   height: 40px;
+  filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.6));
+  z-index: 1;
+}
+
+@keyframes logoGlow {
+  0%, 100% {
+    border-color: rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05);
+  }
+  50% {
+    border-color: rgba(0, 240, 255, 0.6);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.4), inset 0 0 30px rgba(0, 240, 255, 0.1);
+  }
 }
 
 @keyframes glow {
@@ -289,7 +323,7 @@ html.dark body {
 }
 
 .glass-btn {
-  background: rgba(24, 24, 27, 0.4);
+  background: rgba(17, 17, 19, 0.5);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
@@ -297,8 +331,8 @@ html.dark body {
 }
 
 .glass-btn:hover {
-  background: rgba(24, 24, 27, 0.6);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(24, 24, 27, 0.7);
+  border-color: rgba(255, 255, 255, 0.25);
   transform: translateY(-2px);
 }
 
