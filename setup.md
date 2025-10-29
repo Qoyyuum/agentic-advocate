@@ -11,7 +11,7 @@ Complete setup instructions for the Agentic Advocate Chrome Extension.
 ## Step 1: Clone the Repository
 
 ```bash
-git clone [repository-url]
+git clone https://github.com/adi0900/Google_Chrome25.git
 cd agentic-advocate
 ```
 

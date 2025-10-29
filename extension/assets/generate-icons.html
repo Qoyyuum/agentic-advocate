@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Extension Icons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin: 10px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .icon-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Extension Icon Generator</h1>
+    <p>Click the buttons below to download the required icon files for your Chrome extension.</p>
+
+    <div class="icon-container">
+        <div>
+            <h3>16x16 Icon</h3>
+            <canvas id="canvas16" width="16" height="16"></canvas>
+            <br><button onclick="downloadIcon(16)">Download icon16.png</button>
+        </div>
+        <div>
+            <h3>48x48 Icon</h3>
+            <canvas id="canvas48" width="48" height="48"></canvas>
+            <br><button onclick="downloadIcon(48)">Download icon48.png</button>
+        </div>
+        <div>
+            <h3>128x128 Icon</h3>
+            <canvas id="canvas128" width="128" height="128"></canvas>
+            <br><button onclick="downloadIcon(128)">Download icon128.png</button>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click each download button above</li>
+            <li>Save the files as icon16.png, icon48.png, and icon128.png</li>
+            <li>Place all three files in the <code>/extension/assets/</code> directory</li>
+            <li>Reload the extension in Chrome</li>
+        </ol>
+    </div>
+
+    <script>
+        function drawIcon(size) {
+            const canvas = document.getElementById('canvas' + size);
+            const ctx = canvas.getContext('2d');
+
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+
+            // Draw gradient circle background
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2 - 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Scale factor for different sizes
+            const scale = size / 128;
+
+            // Draw robot head
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.roundRect(40*scale, 45*scale, 48*scale, 38*scale, 8*scale);
+            ctx.fill();
+
+            // Draw eyes
+            ctx.fillStyle = '#667eea';
+            ctx.beginPath();
+            ctx.arc(52*scale, 60*scale, 4*scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(76*scale, 60*scale, 4*scale, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw smile
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3*scale;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(50*scale, 72*scale);
+            ctx.quadraticCurveTo(64*scale, 78*scale, 78*scale, 72*scale);
+            ctx.stroke();
+
+            // Draw antenna
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3*scale;
+            ctx.beginPath();
+            ctx.moveTo(64*scale, 45*scale);
+            ctx.lineTo(64*scale, 35*scale);
+            ctx.stroke();
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(64*scale, 32*scale, 3*scale, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw legal scale
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2*scale;
+            ctx.beginPath();
+            ctx.moveTo(64*scale, 85*scale);
+            ctx.lineTo(64*scale, 93*scale);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(60*scale, 88*scale);
+            ctx.lineTo(68*scale, 88*scale);
+            ctx.stroke();
+        }
+
+        function downloadIcon(size) {
+            const canvas = document.getElementById('canvas' + size);
+            const link = document.createElement('a');
+            link.download = 'icon' + size + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Draw all icons on page load
+        window.onload = function() {
+            drawIcon(16);
+            drawIcon(48);
+            drawIcon(128);
+        };
+    </script>
+</body>
+</html>
