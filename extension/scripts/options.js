@@ -1,9 +1,42 @@
 // Options Page Script for Agentic Advocate Extension
 
 document.addEventListener('DOMContentLoaded', () => {
+  initIcons();
   loadSettings();
   setupEventListeners();
 });
+
+// Initialize all Lucide icons
+function initIcons() {
+  // Header icon
+  document.getElementById('headerIcon').appendChild(createIcon('settings', 40));
+
+  // Section icons
+  document.getElementById('aiIcon').appendChild(createIcon('bot', 24));
+  document.getElementById('privacyIcon').appendChild(createIcon('shield', 24));
+  document.getElementById('featuresIcon').appendChild(createIcon('zap', 24));
+  document.getElementById('userIcon').appendChild(createIcon('sparkles', 24));
+  document.getElementById('aboutIcon').appendChild(createIcon('info', 24));
+
+  // Checkbox icons (check marks)
+  document.getElementById('aiCheckIcon').appendChild(createIcon('checkCircle', 16));
+  document.getElementById('storageCheckIcon').appendChild(createIcon('checkCircle', 16));
+  document.getElementById('chatCheckIcon').appendChild(createIcon('checkCircle', 16));
+  document.getElementById('legalCheckIcon').appendChild(createIcon('checkCircle', 16));
+  document.getElementById('taxCheckIcon').appendChild(createIcon('checkCircle', 16));
+  document.getElementById('autoFillCheckIcon').appendChild(createIcon('checkCircle', 16));
+  document.getElementById('highlightCheckIcon').appendChild(createIcon('checkCircle', 16));
+
+  // Button icons
+  document.getElementById('clearIcon').appendChild(createIcon('x', 16));
+  document.getElementById('saveIcon').appendChild(createIcon('download', 16));
+  document.getElementById('resetIcon').appendChild(createIcon('upload', 16));
+
+  // About link icons
+  document.getElementById('githubIcon').appendChild(createIcon('code', 16));
+  document.getElementById('privacyLinkIcon').appendChild(createIcon('shield', 16));
+  document.getElementById('licenseLinkIcon').appendChild(createIcon('fileText', 16));
+}
 
 // Load saved settings
 function loadSettings() {

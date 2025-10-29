@@ -1,12 +1,41 @@
 // Popup Script for Agentic Advocate Extension
 
 document.addEventListener('DOMContentLoaded', () => {
+  initIcons();
   initPopup();
   loadChatHistory();
   loadRecentDocuments();
   checkAIStatus();
   setupEventListeners();
 });
+
+// Initialize all Lucide icons
+function initIcons() {
+  // Header logo icon
+  document.getElementById('logoIcon').appendChild(createIcon('bot', 32));
+
+  // Status icon
+  document.getElementById('statusIcon').appendChild(createIcon('sparkles', 20));
+
+  // Quick action icons
+  document.getElementById('analyzeIcon').appendChild(createIcon('fileText', 24));
+  document.getElementById('legalIcon').appendChild(createIcon('scale', 24));
+  document.getElementById('taxIcon').appendChild(createIcon('dollarSign', 24));
+  document.getElementById('autoFillIcon').appendChild(createIcon('penTool', 24));
+
+  // Chat icons
+  document.getElementById('chatIcon').appendChild(createIcon('messageSquare', 16));
+  document.getElementById('botMessageIcon').appendChild(createIcon('bot', 16));
+  document.getElementById('sendIcon').appendChild(createIcon('send', 18));
+
+  // Documents icon
+  document.getElementById('documentsIcon').appendChild(createIcon('fileText', 16));
+
+  // Footer icons
+  document.getElementById('settingsIcon').appendChild(createIcon('settings', 16));
+  document.getElementById('helpIcon').appendChild(createIcon('helpCircle', 16));
+  document.getElementById('infoIcon').appendChild(createIcon('info', 16));
+}
 
 // Initialize popup
 function initPopup() {
@@ -15,25 +44,21 @@ function initPopup() {
 
 // Check AI capabilities and update status
 async function checkAIStatus() {
-  const statusDot = document.getElementById('statusDot');
   const statusText = document.getElementById('statusText');
   const statusMode = document.getElementById('statusMode');
 
   try {
     chrome.runtime.sendMessage({ action: 'getAICapabilities' }, (response) => {
       if (response.available) {
-        statusDot.classList.add('active');
         statusText.textContent = 'AI Ready';
         statusMode.textContent = `Mode: ${response.mode === 'local' ? 'Local (Gemini Nano)' : 'Remote Fallback'}`;
       } else {
-        statusDot.classList.add('inactive');
         statusText.textContent = 'AI Unavailable';
         statusMode.textContent = response.message || 'Chrome Built-in AI not available';
       }
     });
   } catch (error) {
     console.error('Error checking AI status:', error);
-    statusDot.classList.add('inactive');
     statusText.textContent = 'Error checking AI';
   }
 }
@@ -99,6 +124,12 @@ function addMessageToChat(message, type) {
   const chatContainer = document.getElementById('chatContainer');
   const messageDiv = document.createElement('div');
   messageDiv.className = `chat-message ${type}-message`;
+
+  // Add message icon
+  const iconDiv = document.createElement('div');
+  iconDiv.className = 'message-icon';
+  iconDiv.appendChild(createIcon(type === 'bot' ? 'bot' : 'sparkles', 16));
+  messageDiv.appendChild(iconDiv);
 
   const contentDiv = document.createElement('div');
   contentDiv.className = 'message-content';
