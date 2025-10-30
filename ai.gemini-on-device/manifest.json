@@ -1,0 +1,40 @@
+{
+  "name": "Agentic Advocate - Legal AI Assistant",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "description": "AI-powered legal assistant for document analysis, compliance, tax planning, and automated form filling using Chrome's built-in Gemini Nano.",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "tabs",
+    "activeTab",
+    "notifications",
+    "bookmarks",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "minimum_chrome_version": "138",
+  "side_panel": {
+    "default_path": "sidepanel/index.html"
+  },
+  "action": {
+    "default_icon": {
+      "16": "images/icon16.png",
+      "32": "images/icon32.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    },
+    "default_title": "Open Agentic Advocate Legal Assistant"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "run_at": "document_end"
+  }]
+}
