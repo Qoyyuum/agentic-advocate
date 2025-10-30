@@ -1,5 +1,7 @@
 // Background Service Worker for Agentic Advocate Extension
 
+importScripts('db.js');
+
 // Initialize extension on install
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Agentic Advocate Extension Installed');
@@ -94,8 +96,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 async function checkAICapabilities() {
   try {
     // Service workers don't have access to window object
-    // Check if AI APIs are available via chrome.aiOriginTrial or self
-    if (typeof self !== 'undefined' && self.ai && self.ai.languageModel) {
+    // Check if AI APIs are available via self (worker global)
+    if (typeof self !== 'undefined' && 'LanguageModel' in self) {
       return {
         available: true,
         mode: 'local',
@@ -134,24 +136,21 @@ async function processWithGeminiNano(data) {
 
 // IndexedDB operations (simplified - full implementation in db.js)
 async function saveToIndexedDB(document) {
-  return new Promise((resolve, reject) => {
-    // Placeholder for IndexedDB save operation
-    chrome.storage.local.get(['documents'], (result) => {
-      const documents = result.documents || [];
-      documents.push({ ...document, timestamp: Date.now() });
-      chrome.storage.local.set({ documents }, () => {
-        resolve({ success: true, id: documents.length });
-      });
-    });
-  });
+  try {
+    const id = await self.dbManager.addDocument(document);
+    return { success: true, id };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 }
 
 async function getFromIndexedDB() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(['documents'], (result) => {
-      resolve({ documents: result.documents || [] });
-    });
-  });
+  try {
+    const documents = await self.dbManager.getAllDocuments();
+    return { documents };
+  } catch (error) {
+    return { documents: [], error: error.message };
+  }
 }
 
 // Handle notifications

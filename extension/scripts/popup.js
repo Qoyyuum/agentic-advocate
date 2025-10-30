@@ -338,7 +338,7 @@ function autoExpandTextarea(event) {
 }
 
 // Send chat message
-function sendMessage() {
+async function sendMessage() {
   const chatInput = document.getElementById('chatInput');
   const message = chatInput.value.trim();
 
@@ -358,22 +358,18 @@ function sendMessage() {
   saveChatMessage(message, 'user');
 
   // Process with AI
-  chrome.runtime.sendMessage({
-    action: 'processWithAI',
-    data: {
-      text: message,
-      taskType: 'chat'
-    }
-  }, (response) => {
-    if (response && response.success) {
-      addMessageToChat(response.result, 'bot');
-    } else {
-      addMessageToChat('Sorry, I encountered an error processing your request.', 'bot');
-    }
+  const { defaultTemperature, maxTemperature, defaultTopK, maxTopK } = await LanguageModel.params();
 
-    // Reset processing flag
-    isProcessing = false;
-  });
+  const available = await LanguageModel.availability();
+  if (available !== 'unavailable') {
+    const session = await LanguageModel.create();
+
+    // Prompt the model and stream the result:
+    const stream = await session.prompt(message);
+    addMessageToChat(stream, 'bot');
+  }
+  // Reset processing flag
+  isProcessing = false;
 }
 
 // Add message to chat container
@@ -505,7 +501,7 @@ function openDocument(doc) {
 
 // Open team page
 function openTeam() {
-  chrome.tabs.create({ url: 'https://github.com/adi0900' });
+  chrome.tabs.create({ url: 'https://github.com/Qoyyuum' });
 }
 
 // Open help
@@ -515,7 +511,7 @@ function openHelp() {
 
 // Open Github repo
 function openGithub() {
-  chrome.tabs.create({ url: 'https://github.com/adi0900/Google_Chrome25' });
+  chrome.tabs.create({ url: 'https://github.com/Qoyyuum/agentic-advocate' });
 }
 
 // ============================================
