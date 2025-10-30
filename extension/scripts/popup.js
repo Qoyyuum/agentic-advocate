@@ -282,7 +282,7 @@ function setupEventListeners() {
 
   // Chat quick action buttons - Analyze Page & Legal Summarizer
   document.getElementById('analyzePageBtn').addEventListener('click', analyzePage);
-  document.getElementById('legalSummarizerBtn').addEventListener('click', legalSummarizer);
+  // document.getElementById('legalSummarizerBtn').addEventListener('click', legalSummarizer);
 
   // Document summary close button
   const summaryCloseBtn = document.getElementById('summaryCloseBtn');
@@ -337,6 +337,49 @@ function autoExpandTextarea(event) {
   textarea.style.height = newHeight + 'px';
 }
 
+async function detectLanguage(message) {
+  if ('LanguageDetector' in self) {
+    const detector = await LanguageDetector.create({
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
+          console.log(`Downloaded ${e.loaded * 100}%`);
+        });
+      },
+    });
+    const results = await detector.detect(message);
+    return results[0].detectedLanguage;
+  }
+  else {
+    console.log('LanguageDetector not available');
+    return 'en';
+  }
+}
+
+async function translateLanguage(sourcelanguage, message) {
+  const myconfiglanguage = await chrome.storage.local.get('language');
+  if (sourcelanguage === myconfiglanguage.language) {
+    return message;
+  }
+
+  if (!('Translator' in self)) {
+    console.log('Translator not available');
+    return message;
+  }
+
+  const translator = await Translator.create({
+    sourceLanguage: sourcelanguage,
+    targetLanguage: myconfiglanguage.language,
+    monitor(m) {
+      m.addEventListener('downloadprogress', (e) => {
+        console.log(`Downloaded ${e.loaded * 100}%`);
+      });
+    },
+  });  
+
+  const result = await translator.translate(message);
+  return result;
+}
+
 // Send chat message
 async function sendMessage(message) {
   const chatInput = document.getElementById('chatInput');
@@ -363,6 +406,7 @@ async function sendMessage(message) {
   const { defaultTemperature, maxTemperature, defaultTopK, maxTopK } = await LanguageModel.params();
 
   const available = await LanguageModel.availability();
+  const myconfiglanguage = await chrome.storage.local.get('language');
   if (available !== 'unavailable') {
     const session = await LanguageModel.create({
        initialPrompts: [
@@ -373,10 +417,17 @@ async function sendMessage(message) {
       { type: 'image' },
       { type: 'audio' },
     ],
+    expectedOutputs: [
+      { type: 'text', language: [myconfiglanguage.language] },
+    ],
     });
+    
+    const sourcelanguage = await detectLanguage(message);
+    const translatedmessage = await translateLanguage(sourcelanguage, message);
 
-    // Prompt the model and stream the result:
-    const stream = await session.prompt({ type: 'text', content: message });
+
+    // Prompt the model 
+    const stream = await session.prompt([{ role: 'user', content: translatedmessage }]);
     addMessageToChat(stream, 'bot');
   }
   // Reset processing flag
@@ -773,6 +824,7 @@ function closeSummary() {
 
 // Open configuration modal
 function openConfigModal() {
+  console.log("Open Config Modal")
   const modal = document.getElementById('configModal');
   modal.classList.add('show');
 
