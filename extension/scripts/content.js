@@ -26,9 +26,9 @@ async function analyzeSelectedText(text) {
   console.log(text)
   const options = {
     sharedContext: 'This is a legal document',
-    type: 'key-points',
-    format: 'markdown',
-    length: 'medium',
+    type: 'tldr',
+    format: 'plain-text',
+    length: 'long',
     monitor(m) {
       m.addEventListener('downloadprogress', (e) => {
         console.log(`Downloaded ${e.loaded * 100}%`);
