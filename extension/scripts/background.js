@@ -24,19 +24,42 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Handle context menu clicks
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === 'analyze-text') {
     const selectedText = info.selectionText;
+    console.log('Context menu clicked, analyzing text:', selectedText.substring(0, 50) + '...');
+
+    // Ensure content script is loaded before sending message
+    const loaded = await ensureContentScriptLoaded(tab.id);
+
+    if (!loaded) {
+      showNotification(
+        'Cannot Analyze on This Page',
+        'This page type does not support extensions. Please try on a regular webpage.'
+      );
+      return;
+    }
+
     // Send to content script for analysis
     chrome.tabs.sendMessage(tab.id, {
       action: 'analyzeText',
       text: selectedText
+    }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('Failed to send analyze message:', chrome.runtime.lastError.message);
+      } else {
+        console.log('Analyze message sent successfully:', response);
+      }
     });
   }
 });
 
+// Icon click now opens popup automatically (no handler needed)
+
 // Handle messages from content scripts and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log('Background received message:', request.action);
+
   switch (request.action) {
     case 'getAICapabilities':
       checkAICapabilities().then(sendResponse);
@@ -54,6 +77,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       getFromIndexedDB().then(sendResponse);
       return true;
 
+    case 'openTab':
+      // Handle tab creation from popup
+      chrome.tabs.create(request.data, (tab) => {
+        sendResponse({ success: true, tabId: tab.id });
+      });
+      return true;
+
     default:
       sendResponse({ error: 'Unknown action' });
   }
@@ -63,8 +93,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Check Chrome Built-in AI capabilities
 async function checkAICapabilities() {
   try {
-    // Check if Prompt API is available
-    if ('ai' in window && 'languageModel' in window.ai) {
+    // Service workers don't have access to window object
+    // Check if AI APIs are available via chrome.aiOriginTrial or self
+    if (typeof self !== 'undefined' && self.ai && self.ai.languageModel) {
       return {
         available: true,
         mode: 'local',
@@ -133,12 +164,99 @@ function showNotification(title, message) {
   });
 }
 
-// Export functions for testing
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    checkAICapabilities,
-    processWithGeminiNano,
-    saveToIndexedDB,
-    getFromIndexedDB
-  };
+// ============================================
+// CONTENT SCRIPT INJECTION HELPER
+// ============================================
+
+/**
+ * Ensure content script is loaded in the tab before sending messages
+ * Prevents "Receiving end does not exist" errors
+ */
+async function ensureContentScriptLoaded(tabId) {
+  try {
+    // First, check if tab is valid and not a chrome:// or edge:// page
+    const tab = await chrome.tabs.get(tabId);
+
+    if (!tab || !tab.url) {
+      console.warn('Invalid tab or missing URL');
+      return false;
+    }
+
+    // Cannot inject into chrome://, edge://, chrome-extension:// pages
+    if (tab.url.startsWith('chrome://') ||
+        tab.url.startsWith('edge://') ||
+        tab.url.startsWith('chrome-extension://') ||
+        tab.url.startsWith('about:')) {
+      console.warn('Cannot inject content script into system page:', tab.url);
+      return false;
+    }
+
+    // Test if content script is already loaded
+    try {
+      await chrome.tabs.sendMessage(tabId, { action: 'ping' });
+      console.log('Content script already loaded');
+      return true;
+    } catch (pingError) {
+      // Content script not loaded, inject it
+      console.log('Content script not loaded, injecting...');
+
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['scripts/content.js']
+      });
+
+      // Inject CSS as well
+      await chrome.scripting.insertCSS({
+        target: { tabId: tabId },
+        files: ['styles/content.css']
+      });
+
+      console.log('Content script injected successfully');
+
+      // Wait a bit for script to initialize
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return true;
+    }
+  } catch (error) {
+    console.error('Error ensuring content script loaded:', error);
+    return false;
+  }
 }
+
+// ============================================
+// SERVICE WORKER KEEP-ALIVE
+// ============================================
+
+/**
+ * Prevent service worker from being terminated too quickly
+ * V3 service workers can terminate after 30 seconds of inactivity
+ */
+let keepAliveInterval = null;
+
+function startKeepAlive() {
+  // Ping every 20 seconds to keep service worker alive
+  keepAliveInterval = setInterval(() => {
+    chrome.runtime.getPlatformInfo(() => {
+      // Just accessing chrome API keeps worker alive
+    });
+  }, 20000);
+}
+
+function stopKeepAlive() {
+  if (keepAliveInterval) {
+    clearInterval(keepAliveInterval);
+    keepAliveInterval = null;
+  }
+}
+
+// Start keep-alive on service worker startup
+startKeepAlive();
+
+// Re-register listeners on service worker restart
+chrome.runtime.onStartup.addListener(() => {
+  console.log('Service worker restarted');
+  startKeepAlive();
+});
+
+// Log service worker startup
+console.log('Background service worker loaded successfully');

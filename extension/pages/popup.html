@@ -78,6 +78,12 @@
         </div>
       </div>
       <div class="chat-input-container glass-panel">
+        <button class="chat-action-btn" id="voiceBtn" title="Voice Command">
+          <div class="chat-action-icon" id="voiceIcon"></div>
+        </button>
+        <button class="chat-action-btn" id="moreBtn" title="Upload File/Image">
+          <div class="chat-action-icon" id="moreIcon"></div>
+        </button>
         <textarea
           class="chat-input"
           id="chatInput"
@@ -87,6 +93,26 @@
         <button class="send-btn neon-btn" id="sendBtn">
           <div class="send-icon" id="sendIcon"></div>
         </button>
+      </div>
+
+      <!-- Upload Modal -->
+      <div class="upload-modal" id="uploadModal">
+        <div class="upload-modal-content glass-panel">
+          <h3 class="upload-modal-title">Upload Document</h3>
+          <div class="upload-options">
+            <label class="upload-option glass-panel-hover" for="fileInput">
+              <div class="upload-icon" id="fileUploadIcon"></div>
+              <span>Choose File</span>
+            </label>
+            <label class="upload-option glass-panel-hover" for="imageInput">
+              <div class="upload-icon" id="imageUploadIcon"></div>
+              <span>Choose Image</span>
+            </label>
+          </div>
+          <button class="upload-close-btn" id="uploadCloseBtn">Cancel</button>
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="display: none;">
+          <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        </div>
       </div>
     </div>
 

@@ -26,6 +26,8 @@ function initIcons() {
   // Chat icons
   document.getElementById('chatIcon').appendChild(createIcon('messageSquare', 16));
   document.getElementById('botMessageIcon').appendChild(createIcon('bot', 16));
+  document.getElementById('voiceIcon').appendChild(createIcon('mic', 18));
+  document.getElementById('moreIcon').appendChild(createIcon('plus', 18));
   document.getElementById('sendIcon').appendChild(createIcon('send', 18));
 
   // Documents icon
@@ -35,6 +37,27 @@ function initIcons() {
   document.getElementById('teamIcon').appendChild(createIcon('users', 16));
   document.getElementById('helpIcon').appendChild(createIcon('helpCircle', 16));
   document.getElementById('githubIcon').appendChild(createIcon('github', 16));
+
+  // Upload modal icons (initialize immediately, modal is just hidden)
+  initUploadIcons();
+}
+
+// Initialize upload modal icons
+function initUploadIcons() {
+  const fileUploadIcon = document.getElementById('fileUploadIcon');
+  const imageUploadIcon = document.getElementById('imageUploadIcon');
+
+  if (!fileUploadIcon || !imageUploadIcon) {
+    console.error('Upload icon elements not found');
+    return;
+  }
+
+  // Clear and add icons
+  fileUploadIcon.innerHTML = '';
+  imageUploadIcon.innerHTML = '';
+
+  fileUploadIcon.appendChild(createIcon('file', 20));
+  imageUploadIcon.appendChild(createIcon('image', 20));
 }
 
 // Initialize popup
@@ -49,12 +72,12 @@ async function checkAIStatus() {
 
   try {
     chrome.runtime.sendMessage({ action: 'getAICapabilities' }, (response) => {
-      if (response.available) {
+      if (response && response.available) {
         statusText.textContent = 'AI Ready';
         statusMode.textContent = `Mode: ${response.mode === 'local' ? 'Local (Gemini Nano)' : 'Remote Fallback'}`;
       } else {
         statusText.textContent = 'AI Unavailable';
-        statusMode.textContent = response.message || 'Chrome Built-in AI not available';
+        statusMode.textContent = response?.message || 'Chrome Built-in AI not available';
       }
     });
   } catch (error) {
@@ -67,11 +90,25 @@ async function checkAIStatus() {
 let sendMessageTimeout = null;
 let isProcessing = false;
 
+// Auto-expand textarea
+function autoExpandTextarea(event) {
+  const textarea = event ? event.target : document.getElementById('chatInput');
+
+  // Reset height to calculate new scrollHeight
+  textarea.style.height = 'auto';
+
+  // Calculate new height (min 40px, max 150px)
+  const newHeight = Math.min(Math.max(textarea.scrollHeight, 40), 150);
+  textarea.style.height = newHeight + 'px';
+}
+
 // Setup event listeners
 function setupEventListeners() {
   // Chat input
   const chatInput = document.getElementById('chatInput');
   const sendBtn = document.getElementById('sendBtn');
+  const voiceBtn = document.getElementById('voiceBtn');
+  const moreBtn = document.getElementById('moreBtn');
 
   sendBtn.addEventListener('click', () => debouncedSendMessage());
   chatInput.addEventListener('keypress', (e) => {
@@ -80,6 +117,21 @@ function setupEventListeners() {
       debouncedSendMessage();
     }
   });
+
+  // Auto-expand textarea as user types
+  chatInput.addEventListener('input', autoExpandTextarea);
+  chatInput.addEventListener('focus', autoExpandTextarea);
+
+  // Voice command button
+  voiceBtn.addEventListener('click', toggleVoiceInput);
+
+  // More button (upload)
+  moreBtn.addEventListener('click', openUploadModal);
+
+  // Upload modal
+  document.getElementById('uploadCloseBtn').addEventListener('click', closeUploadModal);
+  document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+  document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
   // Quick action buttons
   document.getElementById('analyzePageBtn').addEventListener('click', analyzePage);
@@ -117,6 +169,9 @@ function sendMessage() {
   addMessageToChat(message, 'user');
   chatInput.value = '';
 
+  // Reset textarea height
+  chatInput.style.height = 'auto';
+
   // Save to chat history
   saveChatMessage(message, 'user');
 
@@ -128,7 +183,7 @@ function sendMessage() {
       taskType: 'chat'
     }
   }, (response) => {
-    if (response.success) {
+    if (response && response.success) {
       addMessageToChat(response.result, 'bot');
     } else {
       addMessageToChat('Sorry, I encountered an error processing your request.', 'bot');
@@ -218,7 +273,7 @@ function loadRecentDocuments() {
   chrome.runtime.sendMessage({ action: 'getDocuments' }, (response) => {
     const documentsList = document.getElementById('documentsList');
 
-    if (response.documents && response.documents.length > 0) {
+    if (response && response.documents && response.documents.length > 0) {
       documentsList.innerHTML = '';
 
       response.documents.slice(-5).reverse().forEach(doc => {
@@ -293,4 +348,170 @@ function openHelp() {
 // Open Github repo
 function openGithub() {
   chrome.tabs.create({ url: 'https://github.com/adi0900/Google_Chrome25' });
+}
+
+// ============================================
+// VOICE INPUT & FILE UPLOAD
+// ============================================
+
+let recognition = null;
+let isListening = false;
+
+// Toggle voice input
+function toggleVoiceInput() {
+  const voiceBtn = document.getElementById('voiceBtn');
+
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    addMessageToChat('Voice recognition is not supported in your browser.', 'bot');
+    return;
+  }
+
+  if (isListening) {
+    stopVoiceInput();
+  } else {
+    startVoiceInput();
+  }
+}
+
+// Start voice recognition
+function startVoiceInput() {
+  const voiceBtn = document.getElementById('voiceBtn');
+  const chatInput = document.getElementById('chatInput');
+
+  // Create speech recognition instance
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    isListening = true;
+    voiceBtn.classList.add('active');
+    chatInput.placeholder = 'Listening...';
+  };
+
+  recognition.onresult = (event) => {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    chatInput.value = transcript;
+  };
+
+  recognition.onerror = (event) => {
+    console.error('Speech recognition error:', event.error);
+    stopVoiceInput();
+    addMessageToChat('Voice recognition error. Please try again.', 'bot');
+  };
+
+  recognition.onend = () => {
+    stopVoiceInput();
+  };
+
+  recognition.start();
+}
+
+// Stop voice recognition
+function stopVoiceInput() {
+  const voiceBtn = document.getElementById('voiceBtn');
+  const chatInput = document.getElementById('chatInput');
+
+  if (recognition) {
+    recognition.stop();
+    recognition = null;
+  }
+
+  isListening = false;
+  voiceBtn.classList.remove('active');
+  chatInput.placeholder = 'Ask me anything about legal, compliance, or tax matters...';
+}
+
+// Open upload modal
+function openUploadModal() {
+  const modal = document.getElementById('uploadModal');
+
+  // Ensure icons are loaded
+  initUploadIcons();
+
+  modal.classList.add('show');
+}
+
+// Close upload modal
+function closeUploadModal() {
+  const modal = document.getElementById('uploadModal');
+  modal.classList.remove('show');
+}
+
+// Handle file upload
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  closeUploadModal();
+
+  // Show upload in chat
+  addMessageToChat(`📄 Uploaded: ${file.name}`, 'user');
+
+  // Read file content
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target.result;
+
+    // Send to AI for processing
+    chrome.runtime.sendMessage({
+      action: 'processWithAI',
+      data: {
+        text: `Analyze this document:\n\nFilename: ${file.name}\nContent: ${content.substring(0, 5000)}...`,
+        taskType: 'document_analysis'
+      }
+    }, (response) => {
+      if (response && response.success) {
+        addMessageToChat(response.result, 'bot');
+      } else {
+        addMessageToChat('Error processing document. Please try again.', 'bot');
+      }
+    });
+  };
+
+  reader.onerror = () => {
+    addMessageToChat('Error reading file. Please try again.', 'bot');
+  };
+
+  reader.readAsText(file);
+  event.target.value = ''; // Reset input
+}
+
+// Handle image upload
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  closeUploadModal();
+
+  // Show upload in chat
+  addMessageToChat(`🖼️ Uploaded image: ${file.name}`, 'user');
+
+  // Read image as data URL
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const imageData = e.target.result;
+
+    // For now, just confirm upload (actual OCR/vision would require external API)
+    addMessageToChat('Image uploaded successfully. Image analysis feature coming soon!', 'bot');
+
+    // TODO: Integrate with image analysis API
+    // chrome.runtime.sendMessage({
+    //   action: 'analyzeImage',
+    //   data: { image: imageData, filename: file.name }
+    // }, callback);
+  };
+
+  reader.onerror = () => {
+    addMessageToChat('Error reading image. Please try again.', 'bot');
+  };
+
+  reader.readAsDataURL(file);
+  event.target.value = ''; // Reset input
 }

@@ -4,7 +4,12 @@ console.log('Agentic Advocate Content Script Loaded');
 
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'analyzeText') {
+  console.log('Content script received message:', request.action);
+
+  if (request.action === 'ping') {
+    // Health check from background script
+    sendResponse({ success: true, loaded: true });
+  } else if (request.action === 'analyzeText') {
     analyzeSelectedText(request.text);
     sendResponse({ success: true });
   }
