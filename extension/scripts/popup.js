@@ -14,32 +14,43 @@ function initIcons() {
   // Header logo icon
   document.getElementById('logoIcon').appendChild(createIcon('bot', 32));
 
+  // Theme toggle icon - initialize based on current theme
+  const currentTheme = document.documentElement.classList.contains('light') ? 'light' : 'dark';
+  const themeIconName = currentTheme === 'dark' ? 'moon' : 'sun';
+  document.getElementById('themeIcon').appendChild(createIcon(themeIconName, 18));
+
   // Status icon
   document.getElementById('statusIcon').appendChild(createIcon('sparkles', 20));
-
-  // Quick action icons
-  document.getElementById('analyzeIcon').appendChild(createIcon('fileText', 24));
-  document.getElementById('legalIcon').appendChild(createIcon('scale', 24));
-  document.getElementById('taxIcon').appendChild(createIcon('dollarSign', 24));
-  document.getElementById('autoFillIcon').appendChild(createIcon('penTool', 24));
 
   // Chat icons
   document.getElementById('chatIcon').appendChild(createIcon('messageSquare', 16));
   document.getElementById('botMessageIcon').appendChild(createIcon('bot', 16));
   document.getElementById('voiceIcon').appendChild(createIcon('mic', 18));
-  document.getElementById('moreIcon').appendChild(createIcon('plus', 18));
+  document.getElementById('moreIcon').appendChild(createIcon('moreHorizontal', 18));
   document.getElementById('sendIcon').appendChild(createIcon('send', 18));
+
+  // Chat quick action icons - Analyze Page & Legal Summarizer
+  document.getElementById('analyzePageIcon').appendChild(createIcon('search', 18));
+  document.getElementById('legalSummarizerIcon').appendChild(createIcon('scale', 18));
+
+  // Document summary icons
+  document.getElementById('summaryIcon').appendChild(createIcon('fileText', 16));
+  document.getElementById('summaryCloseIcon').appendChild(createIcon('x', 14));
 
   // Documents icon
   document.getElementById('documentsIcon').appendChild(createIcon('fileText', 16));
 
   // Footer icons
+  document.getElementById('configIcon').appendChild(createIcon('settings', 16));
   document.getElementById('teamIcon').appendChild(createIcon('users', 16));
   document.getElementById('helpIcon').appendChild(createIcon('helpCircle', 16));
   document.getElementById('githubIcon').appendChild(createIcon('github', 16));
 
   // Upload modal icons (initialize immediately, modal is just hidden)
   initUploadIcons();
+
+  // Config modal icons
+  initConfigIcons();
 }
 
 // Initialize upload modal icons
@@ -60,9 +71,32 @@ function initUploadIcons() {
   imageUploadIcon.appendChild(createIcon('image', 20));
 }
 
+// Initialize config modal icons
+function initConfigIcons() {
+  const configCloseIcon = document.getElementById('configCloseIcon');
+  const apiKeyToggleIcon = document.getElementById('apiKeyToggleIcon');
+
+  if (configCloseIcon) {
+    configCloseIcon.appendChild(createIcon('x', 16));
+  }
+
+  if (apiKeyToggleIcon) {
+    apiKeyToggleIcon.appendChild(createIcon('eye', 16));
+  }
+}
+
 // Initialize popup
 function initPopup() {
   console.log('Agentic Advocate Popup Initialized');
+  // Initialize theme from storage
+  chrome.storage.local.get(['theme'], (result) => {
+    const savedTheme = result.theme || 'dark';
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(savedTheme);
+  });
+
+  // Load configuration from storage
+  loadConfiguration();
 }
 
 // Check AI capabilities and update status
@@ -86,9 +120,112 @@ async function checkAIStatus() {
   }
 }
 
-// Debounce helper
-let sendMessageTimeout = null;
-let isProcessing = false;
+// Toggle theme between light and dark
+function toggleTheme() {
+  const currentTheme = document.documentElement.classList.contains('light') ? 'light' : 'dark';
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  
+  // Apply theme
+  document.documentElement.classList.remove('light', 'dark');
+  document.documentElement.classList.add(newTheme);
+  
+  // Update theme icon
+  const themeIcon = document.getElementById('themeIcon');
+  themeIcon.innerHTML = '';
+  const icon = newTheme === 'dark' ? 
+    createIcon('moon', 18) : 
+    createIcon('sun', 18);
+  themeIcon.appendChild(icon);
+  
+  // Save preference to storage
+  chrome.storage.local.set({ theme: newTheme });
+}
+
+// Initialize theme from storage
+function initializeTheme() {
+  chrome.storage.local.get(['theme'], (result) => {
+    const savedTheme = result.theme || 'dark';
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(savedTheme);
+    
+    // Update theme icon
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+      themeIcon.innerHTML = '';
+      const icon = savedTheme === 'dark' ? 
+        createIcon('moon', 18) : 
+        createIcon('sun', 18);
+      themeIcon.appendChild(icon);
+    }
+  });
+}
+
+// Open configuration modal
+function openConfigModal() {
+  document.getElementById('configModal').classList.add('active');
+  
+  // Load saved configuration
+  chrome.storage.local.get(['apiChoice', 'apiKey', 'language'], (result) => {
+    if (result.apiChoice) {
+      document.getElementById('apiChoice').value = result.apiChoice;
+    }
+    // Don't populate API key for security reasons
+    if (result.language) {
+      document.getElementById('language').value = result.language;
+    }
+  });
+}
+
+// Close configuration modal
+function closeConfigModal() {
+  document.getElementById('configModal').classList.remove('active');
+}
+
+// Save configuration
+function saveConfiguration() {
+  const config = {
+    apiChoice: document.getElementById('apiChoice').value,
+    // Don't save the API key in plain text - this is just a placeholder
+    // In a real implementation, API keys would need to be securely handled
+    language: document.getElementById('language').value
+  };
+  
+  chrome.storage.local.set(config, () => {
+    closeConfigModal();
+    showStatusMessage('Configuration saved successfully!', 'success');
+  });
+}
+
+// Show status message
+function showStatusMessage(message, type = 'info') {
+  // Create status message element
+  const statusMsg = document.createElement('div');
+  statusMsg.className = `status-message ${type}`;
+  statusMsg.textContent = message;
+  statusMsg.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    background: ${type === 'success' ? 'rgba(0, 200, 100, 0.9)' : 'rgba(255, 159, 67, 0.9)'};
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    font-weight: 500;
+    animation: fadeInOut 3s ease-in-out;
+  `;
+
+  document.body.appendChild(statusMsg);
+
+  // Remove message after 3 seconds
+  setTimeout(() => {
+    if (statusMsg.parentNode) {
+      statusMsg.parentNode.removeChild(statusMsg);
+    }
+  }, 3000);
+}
 
 // Auto-expand textarea
 function autoExpandTextarea(event) {
@@ -104,6 +241,16 @@ function autoExpandTextarea(event) {
 
 // Setup event listeners
 function setupEventListeners() {
+  // Theme toggle
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  themeToggleBtn.addEventListener('click', toggleTheme);
+  themeToggleBtn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleTheme();
+    }
+  });
+
   // Chat input
   const chatInput = document.getElementById('chatInput');
   const sendBtn = document.getElementById('sendBtn');
@@ -133,26 +280,61 @@ function setupEventListeners() {
   document.getElementById('fileInput').addEventListener('change', handleFileUpload);
   document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
-  // Quick action buttons
+  // Chat quick action buttons - Analyze Page & Legal Summarizer
   document.getElementById('analyzePageBtn').addEventListener('click', analyzePage);
-  document.getElementById('legalReviewBtn').addEventListener('click', legalReview);
-  document.getElementById('taxPlanningBtn').addEventListener('click', taxPlanning);
-  document.getElementById('autoFillBtn').addEventListener('click', autoFillForm);
+  document.getElementById('legalSummarizerBtn').addEventListener('click', legalSummarizer);
 
-  // Footer links
-  document.getElementById('teamBtn').addEventListener('click', openTeam);
-  document.getElementById('helpBtn').addEventListener('click', openHelp);
-  document.getElementById('githubBtn').addEventListener('click', openGithub);
+  // Document summary close button
+  const summaryCloseBtn = document.getElementById('summaryCloseBtn');
+  if (summaryCloseBtn) {
+    summaryCloseBtn.addEventListener('click', closeSummary);
+    summaryCloseBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        closeSummary();
+      }
+    });
+  }
+
+  // Configuration modal
+  document.getElementById('configBtn').addEventListener('click', openConfigModal);
+  document.getElementById('configCloseBtn').addEventListener('click', closeConfigModal);
+  document.getElementById('configCancelBtn').addEventListener('click', closeConfigModal);
+  document.getElementById('configSaveBtn').addEventListener('click', saveConfiguration);
+
+  // API key toggle
+  document.getElementById('apiKeyToggle').addEventListener('click', toggleApiKeyVisibility);
+
+  // Close modals on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeUploadModal();
+      closeConfigModal();
+    }
+  });
+
+  // Close modals when clicking outside
+  document.getElementById('configModal').addEventListener('click', (e) => {
+    if (e.target.id === 'configModal') {
+      closeConfigModal();
+    }
+  });
 }
 
-// Debounced send message to prevent rapid multiple AI responses
-function debouncedSendMessage() {
-  if (isProcessing) return;
+// Debounce helper
+let sendMessageTimeout = null;
+let isProcessing = false;
 
-  clearTimeout(sendMessageTimeout);
-  sendMessageTimeout = setTimeout(() => {
-    sendMessage();
-  }, 300);
+// Auto-expand textarea
+function autoExpandTextarea(event) {
+  const textarea = event ? event.target : document.getElementById('chatInput');
+
+  // Reset height to calculate new scrollHeight
+  textarea.style.height = 'auto';
+
+  // Calculate new height (min 40px, max 150px)
+  const newHeight = Math.min(Math.max(textarea.scrollHeight, 40), 150);
+  textarea.style.height = newHeight + 'px';
 }
 
 // Send chat message
@@ -309,24 +491,10 @@ function analyzePage() {
   });
 }
 
-// Quick action: Legal review
-function legalReview() {
-  addMessageToChat('Please select text on the page or paste your legal document for review.', 'bot');
-}
-
-// Quick action: Tax planning
-function taxPlanning() {
-  addMessageToChat('I can help with tax planning. Please describe your situation or upload relevant documents.', 'bot');
-}
-
-// Quick action: Auto-fill form
-function autoFillForm() {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.tabs.sendMessage(tabs[0].id, {
-      action: 'autoFillDetectedForm'
-    });
-    addMessageToChat('Looking for forms to auto-fill on the current page...', 'bot');
-  });
+// Chat Quick Action: Legal Summarizer
+function legalSummarizer() {
+  addMessageToChat('Legal Summarizer activated. Please upload a legal document or select text on the page for summarization.', 'bot');
+  // TODO: Implement legal summarization workflow
 }
 
 // Open document
@@ -469,6 +637,8 @@ function handleFileUpload(event) {
     }, (response) => {
       if (response && response.success) {
         addMessageToChat(response.result, 'bot');
+        // Show document summary
+        showSummary(response.result);
       } else {
         addMessageToChat('Error processing document. Please try again.', 'bot');
       }
@@ -514,4 +684,123 @@ function handleImageUpload(event) {
 
   reader.readAsDataURL(file);
   event.target.value = ''; // Reset input
+}
+
+// ============================================
+// THEME SWITCHING
+// ============================================
+
+// Toggle theme between light and dark
+function toggleTheme() {
+  const currentTheme = document.documentElement.classList.contains('light') ? 'light' : 'dark';
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+  // Apply theme with smooth transition
+  document.documentElement.classList.remove('light', 'dark');
+  document.documentElement.classList.add(newTheme);
+
+  // Update theme icon
+  const themeIcon = document.getElementById('themeIcon');
+  themeIcon.innerHTML = '';
+  const iconName = newTheme === 'dark' ? 'moon' : 'sun';
+  themeIcon.appendChild(createIcon(iconName, 18));
+
+  // Save preference to storage
+  chrome.storage.local.set({ theme: newTheme });
+}
+
+// ============================================
+// DOCUMENT SUMMARY
+// ============================================
+
+// Show document summary
+function showSummary(summary) {
+  const summaryElement = document.getElementById('documentSummary');
+  const summaryContent = document.getElementById('summaryContent');
+
+  summaryContent.innerHTML = `<p>${summary}</p>`;
+  summaryElement.style.display = 'block';
+}
+
+// Close document summary
+function closeSummary() {
+  const summaryElement = document.getElementById('documentSummary');
+  summaryElement.style.display = 'none';
+}
+
+// ============================================
+// CONFIGURATION MODAL
+// ============================================
+
+// Open configuration modal
+function openConfigModal() {
+  const modal = document.getElementById('configModal');
+  modal.classList.add('show');
+
+  // Set focus to first input for accessibility
+  setTimeout(() => {
+    document.getElementById('apiChoice').focus();
+  }, 100);
+}
+
+// Close configuration modal
+function closeConfigModal() {
+  const modal = document.getElementById('configModal');
+  modal.classList.remove('show');
+}
+
+// Load configuration from storage
+function loadConfiguration() {
+  chrome.storage.local.get(['apiChoice', 'apiKey', 'language'], (result) => {
+    if (result.apiChoice) {
+      document.getElementById('apiChoice').value = result.apiChoice;
+    }
+    // Don't populate API key for security
+    if (result.language) {
+      document.getElementById('languageChoice').value = result.language;
+    }
+  });
+}
+
+// Save configuration
+function saveConfiguration() {
+  const apiChoice = document.getElementById('apiChoice').value;
+  const apiKey = document.getElementById('apiKey').value;
+  const language = document.getElementById('languageChoice').value;
+
+  // Validate inputs
+  if (!apiChoice) {
+    showStatusMessage('Please select an AI provider', 'error');
+    return;
+  }
+
+  // Save to storage (API key should be encrypted in production)
+  chrome.storage.local.set({
+    apiChoice: apiChoice,
+    apiKey: apiKey, // In production, encrypt this
+    language: language
+  }, () => {
+    showStatusMessage('Configuration saved successfully!', 'success');
+    closeConfigModal();
+
+    // Update any UI elements that depend on language
+    // This is a placeholder for future internationalization
+    console.log('Language set to:', language);
+  });
+}
+
+// Toggle API key visibility
+function toggleApiKeyVisibility() {
+  const apiKeyInput = document.getElementById('apiKey');
+  const toggleIcon = document.getElementById('apiKeyToggleIcon');
+
+  if (apiKeyInput.type === 'password') {
+    apiKeyInput.type = 'text';
+    toggleIcon.innerHTML = '';
+    toggleIcon.appendChild(createIcon('eyeOff', 16));
+  } else {
+    apiKeyInput.type = 'password';
+    toggleIcon.innerHTML = '';
+    toggleIcon.appendChild(createIcon('eye', 16));
+  }
 }

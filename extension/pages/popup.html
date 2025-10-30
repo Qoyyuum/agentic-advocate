@@ -13,63 +13,34 @@
       <div class="header-content">
         <div class="logo-section">
           <div class="logo-icon" id="logoIcon"></div>
-          <div>
+          <div class="logo-text">
             <h1 class="title neon-text">Agentic Advocate</h1>
             <p class="subtitle">AI-Powered Legal Assistant</p>
           </div>
         </div>
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light/Dark Mode" aria-label="Toggle theme">
+          <div class="theme-icon" id="themeIcon"></div>
+        </button>
       </div>
     </header>
 
     <!-- AI Status Card -->
     <div class="status-card glass-panel">
-      <div class="status-header">
-        <div class="status-icon" id="statusIcon"></div>
-        <div class="status-info">
-          <span class="status-text" id="statusText">Checking AI availability...</span>
-          <span class="status-mode" id="statusMode"></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <h3 class="section-title">Quick Actions</h3>
-      <div class="action-grid">
-        <button class="action-btn glass-panel-hover" id="analyzePageBtn" data-icon="fileText">
-          <div class="action-icon-wrapper">
-            <div class="action-icon" id="analyzeIcon"></div>
-          </div>
-          <span class="action-label">Analyze Page</span>
-        </button>
-        <button class="action-btn glass-panel-hover" id="legalReviewBtn" data-icon="scale">
-          <div class="action-icon-wrapper">
-            <div class="action-icon" id="legalIcon"></div>
-          </div>
-          <span class="action-label">Legal Review</span>
-        </button>
-        <button class="action-btn glass-panel-hover" id="taxPlanningBtn" data-icon="dollarSign">
-          <div class="action-icon-wrapper">
-            <div class="action-icon" id="taxIcon"></div>
-          </div>
-          <span class="action-label">Tax Planning</span>
-        </button>
-        <button class="action-btn glass-panel-hover" id="autoFillBtn" data-icon="penTool">
-          <div class="action-icon-wrapper">
-            <div class="action-icon" id="autoFillIcon"></div>
-          </div>
-          <span class="action-label">Auto-Fill Form</span>
-        </button>
+      <div class="status-icon" id="statusIcon"></div>
+      <div class="status-info">
+        <span class="status-text" id="statusText">Checking AI availability...</span>
+        <span class="status-mode" id="statusMode"></span>
       </div>
     </div>
 
     <!-- Chat Interface -->
-    <div class="chat-section">
-      <div class="chat-header">
-        <div class="chat-title-icon" id="chatIcon"></div>
+    <div class="chat-section glass-panel">
+      <div class="section-header">
+        <div class="section-icon" id="chatIcon"></div>
         <h3 class="section-title">AI Chat</h3>
       </div>
-      <div class="chat-container glass-panel" id="chatContainer">
+
+      <div class="chat-messages" id="chatContainer">
         <div class="chat-message bot-message">
           <div class="message-icon" id="botMessageIcon"></div>
           <div class="message-content">
@@ -77,71 +48,153 @@
           </div>
         </div>
       </div>
-      <div class="chat-input-container glass-panel">
-        <button class="chat-action-btn" id="voiceBtn" title="Voice Command">
-          <div class="chat-action-icon" id="voiceIcon"></div>
-        </button>
-        <button class="chat-action-btn" id="moreBtn" title="Upload File/Image">
-          <div class="chat-action-icon" id="moreIcon"></div>
-        </button>
-        <textarea
-          class="chat-input"
-          id="chatInput"
-          placeholder="Ask me anything about legal, compliance, or tax matters..."
-          rows="2"
-        ></textarea>
-        <button class="send-btn neon-btn" id="sendBtn">
-          <div class="send-icon" id="sendIcon"></div>
-        </button>
-      </div>
 
-      <!-- Upload Modal -->
-      <div class="upload-modal" id="uploadModal">
-        <div class="upload-modal-content glass-panel">
-          <h3 class="upload-modal-title">Upload Document</h3>
-          <div class="upload-options">
-            <label class="upload-option glass-panel-hover" for="fileInput">
-              <div class="upload-icon" id="fileUploadIcon"></div>
-              <span>Choose File</span>
-            </label>
-            <label class="upload-option glass-panel-hover" for="imageInput">
-              <div class="upload-icon" id="imageUploadIcon"></div>
-              <span>Choose Image</span>
-            </label>
-          </div>
-          <button class="upload-close-btn" id="uploadCloseBtn">Cancel</button>
-          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="display: none;">
-          <input type="file" id="imageInput" accept="image/*" style="display: none;">
+      <div class="chat-input-wrapper">
+        <div class="chat-actions">
+          <button class="action-btn" id="voiceBtn" title="Voice Command" aria-label="Voice input">
+            <div class="action-icon" id="voiceIcon"></div>
+          </button>
+          <button class="action-btn" id="moreBtn" title="Upload File/Image" aria-label="Upload file">
+            <div class="action-icon" id="moreIcon"></div>
+          </button>
+          <button class="action-btn" id="analyzePageBtn" title="Analyze Current Page" aria-label="Analyze page">
+            <div class="action-icon" id="analyzePageIcon"></div>
+          </button>
+          <button class="action-btn" id="legalSummarizerBtn" title="Legal Summarizer" aria-label="Legal summarizer">
+            <div class="action-icon" id="legalSummarizerIcon"></div>
+          </button>
+        </div>
+        <div class="input-row">
+          <textarea
+            class="chat-input"
+            id="chatInput"
+            placeholder="Ask me anything about legal, compliance, or tax matters..."
+            rows="1"
+            aria-label="Chat message input"
+          ></textarea>
+          <button class="send-btn neon-btn" id="sendBtn" aria-label="Send message">
+            <div class="send-icon" id="sendIcon"></div>
+          </button>
         </div>
       </div>
     </div>
 
+    <!-- Document Summary (Hidden by default) -->
+    <div class="document-summary glass-panel" id="documentSummary" style="display: none;">
+      <div class="summary-header">
+        <div class="summary-icon" id="summaryIcon"></div>
+        <span class="summary-title">Document Summary</span>
+        <button class="close-btn" id="summaryCloseBtn" title="Close summary" aria-label="Close summary">
+          <div class="close-icon" id="summaryCloseIcon"></div>
+        </button>
+      </div>
+      <div class="summary-content" id="summaryContent">
+        <p class="placeholder-text">Upload a document to see its summary here.</p>
+      </div>
+    </div>
+
     <!-- Recent Documents -->
-    <div class="documents-section">
-      <div class="documents-header">
-        <div class="documents-icon" id="documentsIcon"></div>
+    <div class="documents-section glass-panel">
+      <div class="section-header">
+        <div class="section-icon" id="documentsIcon"></div>
         <h3 class="section-title">Recent Documents</h3>
       </div>
-      <div class="documents-list glass-panel" id="documentsList">
-        <p class="empty-state">No documents yet. Start by analyzing a page or uploading a document.</p>
+      <div class="documents-list" id="documentsList">
+        <p class="placeholder-text">No documents yet. Start by analyzing a page or uploading a document.</p>
       </div>
     </div>
 
     <!-- Footer -->
     <footer class="footer glass-panel">
-      <button class="footer-link" id="teamBtn">
+      <button class="footer-btn" id="configBtn" aria-label="Open configuration">
+        <div class="footer-icon" id="configIcon"></div>
+        <span>Config</span>
+      </button>
+      <button class="footer-btn" id="teamBtn" aria-label="View team">
         <div class="footer-icon" id="teamIcon"></div>
         <span>Team</span>
       </button>
-      <button class="footer-link" id="helpBtn">
+      <button class="footer-btn" id="helpBtn" aria-label="Get help">
         <div class="footer-icon" id="helpIcon"></div>
         <span>Help</span>
       </button>
-      <button class="footer-link" id="githubBtn">
+      <button class="footer-btn" id="githubBtn" aria-label="Visit GitHub">
         <div class="footer-icon" id="githubIcon"></div>
         <span>Github</span>
       </button>
     </footer>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal" id="uploadModal">
+    <div class="modal-content glass-panel">
+      <h3 class="modal-title">Upload Document</h3>
+      <div class="upload-options">
+        <label class="upload-option glass-panel-hover" for="fileInput">
+          <div class="upload-icon" id="fileUploadIcon"></div>
+          <span>Choose File</span>
+        </label>
+        <label class="upload-option glass-panel-hover" for="imageInput">
+          <div class="upload-icon" id="imageUploadIcon"></div>
+          <span>Choose Image</span>
+        </label>
+      </div>
+      <button class="modal-btn" id="uploadCloseBtn">Cancel</button>
+      <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="display: none;">
+      <input type="file" id="imageInput" accept="image/*" style="display: none;">
+    </div>
+  </div>
+
+  <!-- Configuration Modal -->
+  <div class="modal" id="configModal" role="dialog" aria-labelledby="configModalTitle" aria-modal="true">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h3 class="modal-title" id="configModalTitle">Configuration</h3>
+        <button class="close-btn" id="configCloseBtn" title="Close configuration" aria-label="Close configuration">
+          <div class="close-icon" id="configCloseIcon"></div>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="apiChoice" class="form-label">AI Provider</label>
+          <select id="apiChoice" class="form-select" aria-label="Select AI provider">
+            <option value="gemini">Google Gemini</option>
+            <option value="local">Local (Gemini Nano)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="apiKey" class="form-label">API Key</label>
+          <div class="input-with-toggle">
+            <input
+              type="password"
+              id="apiKey"
+              class="form-input"
+              placeholder="Enter your API key"
+              aria-label="Enter API key"
+              autocomplete="off"
+            >
+            <button class="toggle-btn" id="apiKeyToggle" type="button" aria-label="Toggle API key visibility">
+              <div class="toggle-icon" id="apiKeyToggleIcon"></div>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="languageChoice" class="form-label">Language</label>
+          <select id="languageChoice" class="form-select" aria-label="Select language">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="hi">हिन्दी</option>
+            <option value="zh">中文</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" id="configCancelBtn">Cancel</button>
+        <button class="modal-btn primary neon-btn" id="configSaveBtn">Save Settings</button>
+      </div>
+    </div>
   </div>
 
   <script src="../scripts/lucide-icons.js"></script>
