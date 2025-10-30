@@ -257,11 +257,11 @@ function setupEventListeners() {
   const voiceBtn = document.getElementById('voiceBtn');
   const moreBtn = document.getElementById('moreBtn');
 
-  sendBtn.addEventListener('click', () => debouncedSendMessage());
+  sendBtn.addEventListener('click', () => sendMessage());
   chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      debouncedSendMessage();
+      sendMessage();
     }
   });
 
@@ -282,7 +282,7 @@ function setupEventListeners() {
 
   // Chat quick action buttons - Analyze Page & Legal Summarizer
   document.getElementById('analyzePageBtn').addEventListener('click', analyzePage);
-  document.getElementById('legalSummarizerBtn').addEventListener('click', legalSummarizer);
+  // document.getElementById('legalSummarizerBtn').addEventListener('click', legalSummarizer);
 
   // Document summary close button
   const summaryCloseBtn = document.getElementById('summaryCloseBtn');
@@ -337,10 +337,55 @@ function autoExpandTextarea(event) {
   textarea.style.height = newHeight + 'px';
 }
 
+async function detectLanguage(message) {
+  if ('LanguageDetector' in self) {
+    const detector = await LanguageDetector.create({
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
+          console.log(`Downloaded ${e.loaded * 100}%`);
+        });
+      },
+    });
+    const results = await detector.detect(message);
+    return results[0].detectedLanguage;
+  }
+  else {
+    console.log('LanguageDetector not available');
+    return 'en';
+  }
+}
+
+async function translateLanguage(sourcelanguage, message) {
+  const myconfiglanguage = await chrome.storage.local.get('language');
+  if (sourcelanguage === myconfiglanguage.language) {
+    return message;
+  }
+
+  if (!('Translator' in self)) {
+    console.log('Translator not available');
+    return message;
+  }
+
+  const translator = await Translator.create({
+    sourceLanguage: sourcelanguage,
+    targetLanguage: myconfiglanguage.language,
+    monitor(m) {
+      m.addEventListener('downloadprogress', (e) => {
+        console.log(`Downloaded ${e.loaded * 100}%`);
+      });
+    },
+  });  
+
+  const result = await translator.translate(message);
+  return result;
+}
+
 // Send chat message
-async function sendMessage() {
+async function sendMessage(message) {
   const chatInput = document.getElementById('chatInput');
-  const message = chatInput.value.trim();
+  if (!message) {
+     message = chatInput.value.trim();
+  }
 
   if (!message || isProcessing) return;
 
@@ -361,11 +406,28 @@ async function sendMessage() {
   const { defaultTemperature, maxTemperature, defaultTopK, maxTopK } = await LanguageModel.params();
 
   const available = await LanguageModel.availability();
+  const myconfiglanguage = await chrome.storage.local.get('language');
   if (available !== 'unavailable') {
-    const session = await LanguageModel.create();
+    const session = await LanguageModel.create({
+       initialPrompts: [
+        { role: 'system', content: 'You are Agentic Advocate, a helpful and friendly legal assistant advising the user on legal jargons and whether the content that they are reading is safe or risky to the user. Keep your responses formal and professional whilst keeping it short and simple for the user to understand like they are non-legal professionals.' },
+    ],
+    expectedInputs: [
+      { type: 'text' },
+      { type: 'image' },
+      { type: 'audio' },
+    ],
+    expectedOutputs: [
+      { type: 'text', language: [myconfiglanguage.language] },
+    ],
+    });
+    
+    const sourcelanguage = await detectLanguage(message);
+    const translatedmessage = await translateLanguage(sourcelanguage, message);
 
-    // Prompt the model and stream the result:
-    const stream = await session.prompt(message);
+
+    // Prompt the model 
+    const stream = await session.prompt([{ role: 'user', content: translatedmessage }]);
     addMessageToChat(stream, 'bot');
   }
   // Reset processing flag
@@ -477,27 +539,58 @@ function loadRecentDocuments() {
 }
 
 // Quick action: Analyze current page
-function analyzePage() {
+async function analyzePage() {
+  addMessageToChat('Analyzing current page...', 'bot');
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.tabs.sendMessage(tabs[0].id, {
-      action: 'analyzePage'
-    }, (response) => {
-      addMessageToChat('Analyzing current page...', 'bot');
+    const tab = tabs && tabs[0];
+    if (!tab) {
+      addMessageToChat('No active tab found.', 'bot');
+      return;
+    }
+    console.log(tab.id);
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      function: () => {
+        const clean = (text) => {
+          if (!text) return '';
+          return text
+            .replace(/\s+/g, ' ')
+            .replace(/\n\s*\n/g, '\n\n')
+            .trim();
+        };
+
+        const selectors = [
+          'article',
+          '[role="main"]',
+          '.content',
+          '.post-content',
+          '.entry-content',
+          '.article-content',
+          'main'
+        ];
+
+        for (const sel of selectors) {
+          const el = document.querySelector(sel);
+          if (el) {
+            const txt = el.innerText || el.textContent || '';
+            return clean(txt).slice(0, 2000);
+          }
+        }
+
+        const bodyTxt = (document.body && (document.body.innerText || document.body.textContent)) || '';
+        return clean(bodyTxt).slice(0, 2000);
+      }
+    }, (results) => {
+      if (results && results[0] && results[0].result) {
+        const content = results[0].result;
+        sendMessage(content);
+      } else {
+        addMessageToChat('Failed to capture page content.', 'bot');
+      }
     });
   });
 }
 
-// Chat Quick Action: Legal Summarizer
-function legalSummarizer() {
-  addMessageToChat('Legal Summarizer activated. Please upload a legal document or select text on the page for summarization.', 'bot');
-  // TODO: Implement legal summarization workflow
-}
-
-// Open document
-function openDocument(doc) {
-  addMessageToChat(`Opening document: ${doc.name}`, 'bot');
-  // TODO: Implement document viewer
-}
 
 // Open team page
 function openTeam() {
@@ -730,6 +823,7 @@ function closeSummary() {
 
 // Open configuration modal
 function openConfigModal() {
+  console.log("Open Config Modal")
   const modal = document.getElementById('configModal');
   modal.classList.add('show');
 

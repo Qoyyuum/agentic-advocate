@@ -25,10 +25,10 @@ async function analyzeSelectedText(text) {
   // Send to background for AI processing
   console.log(text)
   const options = {
-    sharedContext: 'This is a legal document',
+    sharedContext: 'This is a legal document. Analyze and summarize if it contains anything risky or unsafe to the user.',
     type: 'tldr',
     format: 'plain-text',
-    length: 'long',
+    length: 'medium',
     monitor(m) {
       m.addEventListener('downloadprogress', (e) => {
         console.log(`Downloaded ${e.loaded * 100}%`);
@@ -46,7 +46,6 @@ async function analyzeSelectedText(text) {
   if (navigator.userActivation.isActive) {
     const summarizer = await Summarizer.create(options);
     const result = await summarizer.summarize(text);
-    console.log(result);
     showInlineResult(result);
   }
 }
@@ -73,65 +72,6 @@ function showInlineResult(result) {
   // Close button handler
   overlay.querySelector('.agentic-advocate-close').addEventListener('click', () => {
     overlay.remove();
-  });
-}
-
-// Auto-fill detection for legal forms
-function detectLegalForms() {
-  const forms = document.querySelectorAll('form');
-  forms.forEach(form => {
-    // Check if form contains legal/compliance keywords
-    const formText = form.innerText.toLowerCase();
-    if (
-      formText.includes('rti') ||
-      formText.includes('complaint') ||
-      formText.includes('legal') ||
-      formText.includes('compliance')
-    ) {
-      addAutoFillButton(form);
-    }
-  });
-}
-
-// Add auto-fill button to detected forms
-function addAutoFillButton(form) {
-  const button = document.createElement('button');
-  button.textContent = '🤖 Auto-fill with Agentic Advocate';
-  button.className = 'agentic-advocate-autofill-btn';
-  button.type = 'button';
-
-  button.addEventListener('click', (e) => {
-    e.preventDefault();
-    autoFillForm(form);
-  });
-
-  form.insertBefore(button, form.firstChild);
-}
-
-// Auto-fill form with stored data
-function autoFillForm(form) {
-  chrome.storage.local.get(['userPreferences'], (result) => {
-    const prefs = result.userPreferences || {};
-
-    // Get form fields and fill based on stored preferences
-    const inputs = form.querySelectorAll('input, textarea, select');
-    inputs.forEach(input => {
-      const name = input.name.toLowerCase();
-      const label = input.placeholder?.toLowerCase() || '';
-
-      // Basic field detection and filling
-      if (name.includes('name') || label.includes('name')) {
-        input.value = prefs.fullName || '';
-      } else if (name.includes('email') || label.includes('email')) {
-        input.value = prefs.email || '';
-      } else if (name.includes('phone') || label.includes('phone')) {
-        input.value = prefs.phone || '';
-      } else if (name.includes('address') || label.includes('address')) {
-        input.value = prefs.address || '';
-      }
-    });
-
-    showNotification('Form auto-filled successfully!');
   });
 }
 
