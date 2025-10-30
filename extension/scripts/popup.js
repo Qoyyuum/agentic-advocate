@@ -583,8 +583,7 @@ async function analyzePage() {
     }, (results) => {
       if (results && results[0] && results[0].result) {
         const content = results[0].result;
-        addMessageToChat(content, 'bot');
-        console.log('Active page content:', content);
+        sendMessage(content);
       } else {
         addMessageToChat('Failed to capture page content.', 'bot');
       }
