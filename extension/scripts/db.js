@@ -344,12 +344,19 @@ class DatabaseManager {
 // Export singleton instance
 const dbManager = new DatabaseManager();
 
-// Auto-initialize on load
+// Expose and auto-initialize in service worker or window contexts
+if (typeof self !== 'undefined') {
+  self.dbManager = dbManager;
+  if (!dbManager.db) {
+    dbManager.init().catch(console.error);
+  }
+}
+
 if (typeof window !== 'undefined') {
   dbManager.init().catch(console.error);
 }
 
-// Export for module systems
+// Export for module systems (Node/CommonJS)
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { dbManager, DatabaseManager, STORES };
 }

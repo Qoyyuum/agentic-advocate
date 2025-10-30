@@ -12,24 +12,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === 'analyzeText') {
     analyzeSelectedText(request.text);
     sendResponse({ success: true });
+  } else if (request.action === 'analyzePage') {
+    const text = (document.body && document.body.innerText) || document.documentElement.innerText || '';
+    console.log('Agentic Advocate Page Content:', text);
+    sendResponse({ success: true, contentLength: text.length });
   }
   return true;
 });
 
 // Analyze selected text
-function analyzeSelectedText(text) {
+async function analyzeSelectedText(text) {
   // Send to background for AI processing
-  chrome.runtime.sendMessage({
-    action: 'processWithAI',
-    data: {
-      text: text,
-      taskType: 'analysis'
+  console.log(text)
+  const options = {
+    sharedContext: 'This is a legal document',
+    type: 'key-points',
+    format: 'markdown',
+    length: 'medium',
+    monitor(m) {
+      m.addEventListener('downloadprogress', (e) => {
+        console.log(`Downloaded ${e.loaded * 100}%`);
+      });
     }
-  }, (response) => {
-    if (response.success) {
-      showInlineResult(response.result);
-    }
-  });
+  };
+
+  const availability = await Summarizer.availability();
+  if (availability === 'unavailable') {
+    // The Summarizer API isn't usable.
+    return;
+  }
+
+  // Check for user activation before creating the summarizer
+  if (navigator.userActivation.isActive) {
+    const summarizer = await Summarizer.create(options);
+    const result = await summarizer.summarize(text);
+    console.log(result);
+    showInlineResult(result);
+  }
 }
 
 // Show inline result overlay
