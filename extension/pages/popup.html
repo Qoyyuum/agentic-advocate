@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Advocate</title>
+  <link rel="stylesheet" href="../styles/popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header glass-panel">
+      <div class="header-content">
+        <div class="logo-section">
+          <div class="logo-icon" id="logoIcon"></div>
+          <div>
+            <h1 class="title neon-text">Agentic Advocate</h1>
+            <p class="subtitle">AI-Powered Legal Assistant</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- AI Status Card -->
+    <div class="status-card glass-panel">
+      <div class="status-header">
+        <div class="status-icon" id="statusIcon"></div>
+        <div class="status-info">
+          <span class="status-text" id="statusText">Checking AI availability...</span>
+          <span class="status-mode" id="statusMode"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h3 class="section-title">Quick Actions</h3>
+      <div class="action-grid">
+        <button class="action-btn glass-panel-hover" id="analyzePageBtn" data-icon="fileText">
+          <div class="action-icon-wrapper">
+            <div class="action-icon" id="analyzeIcon"></div>
+          </div>
+          <span class="action-label">Analyze Page</span>
+        </button>
+        <button class="action-btn glass-panel-hover" id="legalReviewBtn" data-icon="scale">
+          <div class="action-icon-wrapper">
+            <div class="action-icon" id="legalIcon"></div>
+          </div>
+          <span class="action-label">Legal Review</span>
+        </button>
+        <button class="action-btn glass-panel-hover" id="taxPlanningBtn" data-icon="dollarSign">
+          <div class="action-icon-wrapper">
+            <div class="action-icon" id="taxIcon"></div>
+          </div>
+          <span class="action-label">Tax Planning</span>
+        </button>
+        <button class="action-btn glass-panel-hover" id="autoFillBtn" data-icon="penTool">
+          <div class="action-icon-wrapper">
+            <div class="action-icon" id="autoFillIcon"></div>
+          </div>
+          <span class="action-label">Auto-Fill Form</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-section">
+      <div class="chat-header">
+        <div class="chat-title-icon" id="chatIcon"></div>
+        <h3 class="section-title">AI Chat</h3>
+      </div>
+      <div class="chat-container glass-panel" id="chatContainer">
+        <div class="chat-message bot-message">
+          <div class="message-icon" id="botMessageIcon"></div>
+          <div class="message-content">
+            Hello! I'm your AI legal assistant. How can I help you today?
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-container glass-panel">
+        <button class="chat-action-btn" id="voiceBtn" title="Voice Command">
+          <div class="chat-action-icon" id="voiceIcon"></div>
+        </button>
+        <button class="chat-action-btn" id="moreBtn" title="Upload File/Image">
+          <div class="chat-action-icon" id="moreIcon"></div>
+        </button>
+        <textarea
+          class="chat-input"
+          id="chatInput"
+          placeholder="Ask me anything about legal, compliance, or tax matters..."
+          rows="2"
+        ></textarea>
+        <button class="send-btn neon-btn" id="sendBtn">
+          <div class="send-icon" id="sendIcon"></div>
+        </button>
+      </div>
+
+      <!-- Upload Modal -->
+      <div class="upload-modal" id="uploadModal">
+        <div class="upload-modal-content glass-panel">
+          <h3 class="upload-modal-title">Upload Document</h3>
+          <div class="upload-options">
+            <label class="upload-option glass-panel-hover" for="fileInput">
+              <div class="upload-icon" id="fileUploadIcon"></div>
+              <span>Choose File</span>
+            </label>
+            <label class="upload-option glass-panel-hover" for="imageInput">
+              <div class="upload-icon" id="imageUploadIcon"></div>
+              <span>Choose Image</span>
+            </label>
+          </div>
+          <button class="upload-close-btn" id="uploadCloseBtn">Cancel</button>
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="display: none;">
+          <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Documents -->
+    <div class="documents-section">
+      <div class="documents-header">
+        <div class="documents-icon" id="documentsIcon"></div>
+        <h3 class="section-title">Recent Documents</h3>
+      </div>
+      <div class="documents-list glass-panel" id="documentsList">
+        <p class="empty-state">No documents yet. Start by analyzing a page or uploading a document.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer glass-panel">
+      <button class="footer-link" id="teamBtn">
+        <div class="footer-icon" id="teamIcon"></div>
+        <span>Team</span>
+      </button>
+      <button class="footer-link" id="helpBtn">
+        <div class="footer-icon" id="helpIcon"></div>
+        <span>Help</span>
+      </button>
+      <button class="footer-link" id="githubBtn">
+        <div class="footer-icon" id="githubIcon"></div>
+        <span>Github</span>
+      </button>
+    </footer>
+  </div>
+
+  <script src="../scripts/lucide-icons.js"></script>
+  <script src="../scripts/popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+/* Content Script Styles for Agentic Advocate Extension - Dark Premium Black Theme */
+
+/* Overlay for analysis results */
+#agentic-advocate-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 12, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.agentic-advocate-popup {
+  background: rgba(17, 17, 19, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 240, 255, 0.1);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.agentic-advocate-header {
+  background: linear-gradient(135deg, #00F0FF 0%, #9D4EDD 100%);
+  color: #000;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.agentic-advocate-close {
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  color: #000;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 700;
+}
+
+.agentic-advocate-close:hover {
+  background: rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
+}
+
+.agentic-advocate-content {
+  padding: 24px;
+  overflow-y: auto;
+  line-height: 1.8;
+  color: #f5f5f7;
+  background: rgba(10, 10, 12, 0.5);
+}
+
+/* Auto-fill button */
+.agentic-advocate-autofill-btn {
+  background: linear-gradient(135deg, #00F0FF 0%, #9D4EDD 100%);
+  color: #000;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 16px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 240, 255, 0.3), 0 0 0 1px rgba(0, 240, 255, 0.2);
+}
+
+.agentic-advocate-autofill-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 240, 255, 0.5), 0 0 30px rgba(0, 240, 255, 0.3);
+}
+
+.agentic-advocate-autofill-btn:active {
+  transform: translateY(0);
+}
+
+/* Notification banner */
+.agentic-advocate-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(17, 17, 19, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 255, 133, 0.3);
+  color: #00FF85;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 255, 133, 0.2);
+  z-index: 999998;
+  font-size: 14px;
+  font-weight: 600;
+  animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Legal terms highlighting */
+.agentic-advocate-highlight {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
+  color: #00F0FF;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border-bottom: 2px solid rgba(0, 240, 255, 0.5);
+  font-weight: 600;
+  cursor: help;
+  transition: all 0.2s ease;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.agentic-advocate-highlight:hover {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(157, 78, 221, 0.3));
+  border-bottom-color: rgba(0, 240, 255, 0.8);
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .agentic-advocate-popup {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .agentic-advocate-content {
+    padding: 16px;
+  }
+
+  .agentic-advocate-notification {
+    right: 10px;
+    top: 10px;
+    max-width: calc(100% - 20px);
+  }
+}
+

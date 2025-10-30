@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Matching extension color palette: #0a0a0c background, #f5f5f7 foreground */
+    --background: 240 6% 4%;
+    --foreground: 240 5% 96%;
+    --card: 240 5% 7%;
+    --card-hover: 240 7% 10%;
+    --card-foreground: 240 5% 96%;
+    --popover: 240 5% 7%;
+    --popover-foreground: 240 5% 96%;
+    --primary: 240 5% 96%;
+    --primary-foreground: 240 6% 4%;
+    --secondary: 240 5% 12%;
+    --secondary-foreground: 240 5% 96%;
+    --muted: 240 6% 12%;
+    --muted-foreground: 240 3% 71%;
+    --accent: 240 5% 12%;
+    --accent-foreground: 240 5% 96%;
+    --destructive: 338 100% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 100% / 0.12;
+    --input: 0 0% 100% / 0.12;
+    --ring: 189 100% 50%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+}
+
+@layer components {
+  /* Matching extension glassmorphism: rgba(17, 17, 19, 0.5) with 16px blur */
+  .glass-panel {
+    background: rgba(17, 17, 19, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.75rem;
+  }
+
+  .glass-panel-hover {
+    background: rgba(17, 17, 19, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .glass-panel-hover:hover {
+    background: rgba(24, 24, 27, 0.7);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .glass-input {
+    background: rgba(17, 17, 19, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: hsl(var(--foreground));
+    transition: all 0.2s ease;
+  }
+
+  .glass-input:focus {
+    outline: none;
+    border-color: #00F0FF;
+    box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15), 0 0 20px rgba(0, 240, 255, 0.3);
+    background: rgba(24, 24, 27, 0.6);
+  }
+
+  .neon-text {
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-image: linear-gradient(135deg, #00F0FF, #9D4EDD, #FF006E);
+  }
+
+  .neon-btn {
+    background: linear-gradient(135deg, #00F0FF, #9D4EDD);
+    color: #000;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .neon-btn:hover {
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+    transform: translateY(-2px);
+  }
+
+  .neon-border {
+    border: 2px solid rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+  }
+
+  .shimmer-effect {
+    background-image: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  /* Logo glassmorphic effect matching extension */
+  .logo-glass {
+    position: relative;
+    background: rgba(0, 240, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05);
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animate-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animate-delay-600 {
+    animation-delay: 600ms;
+  }
+}
