@@ -1150,6 +1150,68 @@ html.light .form-select:focus {
   transform: translateY(0);
 }
 
+/* ===== TEAM MODAL ===== */
+.team-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.team-member-avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+.avatar-icon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--neon-cyan);
+}
+
+html.light .team-member-avatar {
+  background: rgba(14, 165, 233, 0.1);
+  border-color: rgba(14, 165, 233, 0.2);
+}
+
+html.light .avatar-icon svg {
+  color: var(--neon-cyan);
+  opacity: 1;
+}
+
+.team-member-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.team-member-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.team-member-role {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 /* ===== LIGHT MODE ICON OVERRIDES ===== */
 html.light svg {
   opacity: 1;

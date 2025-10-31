@@ -54,6 +54,18 @@ function initIcons() {
 
   // Config modal icons
   initConfigIcons();
+  
+  // Team modal icons
+  initTeamIcons();
+}
+
+// Initialize team modal icons
+function initTeamIcons() {
+  const teamCloseIcon = document.getElementById('teamCloseIcon');
+  
+  if (teamCloseIcon) {
+    teamCloseIcon.appendChild(createIcon('x', 16));
+  }
 }
 
 // Initialize upload modal icons
@@ -307,6 +319,11 @@ function setupEventListeners() {
 
   // API key toggle
   document.getElementById('apiKeyToggle').addEventListener('click', toggleApiKeyVisibility);
+  
+  // Team modal
+  document.getElementById('teamBtn').addEventListener('click', openTeamModal);
+  document.getElementById('teamCloseBtn').addEventListener('click', closeTeamModal);
+  document.getElementById('teamCloseFooterBtn').addEventListener('click', closeTeamModal);
   
   // Document generator action tabs
   document.getElementById('writerTab').addEventListener('click', () => switchActionMode('writer'));
@@ -908,6 +925,23 @@ function toggleApiKeyVisibility() {
     toggleIcon.innerHTML = '';
     toggleIcon.appendChild(createIcon('eye', 16));
   }
+}
+
+// ============================================
+// TEAM MODAL
+// ============================================
+
+// Open team modal
+function openTeamModal() {
+  console.log("Open Team Modal")
+  const modal = document.getElementById('teamModal');
+  modal.classList.add('show');
+}
+
+// Close team modal
+function closeTeamModal() {
+  const modal = document.getElementById('teamModal');
+  modal.classList.remove('show');
 }
 
 // Switch between action modes (writer, rewriter, proofreader)
