@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic Advocate</title>
+  <link rel="stylesheet" href="popup.css">
+  <script type="module" src="popup.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">⚖️</div>
+      <div class="title">Agentic Advocate</div>
+    </div>
+    <button id="openOptions" title="Settings" class="icon-button">⚙️</button>
+  </header>
+
+  <div class="container">
+    <!-- Quick Action Section -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">💬 Quick Action</h2>
+        <div class="badge">AI-Powered</div>
+      </div>
+      
+      <textarea id="quickPrompt" placeholder="Describe what you need (e.g., 'Create a non-disclosure agreement for software development')"></textarea>
+      
+      <div class="button-row">
+        <button id="btnQuickSend" class="btn btn-primary">
+          <span class="btn-icon">💡</span>
+          <span>Quick Send</span>
+        </button>
+      </div>
+
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <div class="doc-type-selector">
+        <select id="docType" class="select-input">
+          <option value="contract">📄 Contract</option>
+          <option value="invoice">💰 Invoice</option>
+          <option value="agreement">🤝 Agreement</option>
+        </select>
+        <button id="btnGenerateDoc" class="btn btn-success">
+          <span class="btn-icon">✨</span>
+          <span>Generate Document</span>
+        </button>
+      </div>
+      
+      <div id="quickOutput" class="output-box">
+        <div class="output-placeholder">Generated document will appear here...</div>
+      </div>
+    </section>
+
+    <!-- Legal Review Section -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">📋 Legal Review</h2>
+        <div class="badge">Smart Analysis</div>
+      </div>
+      
+      <div class="button-row">
+        <button id="btnAnalyzePage" class="btn btn-secondary">
+          <span class="btn-icon">🔍</span>
+          <span>Analyze Page</span>
+        </button>
+        <button id="btnSummarizeInput" class="btn btn-secondary">
+          <span class="btn-icon">📝</span>
+          <span>Summarize</span>
+        </button>
+      </div>
+      
+      <textarea id="reviewInput" placeholder="Paste legal text to analyze or summarize..."></textarea>
+      
+      <div id="reviewOutput" class="output-box">
+        <div class="output-placeholder">Analysis results will appear here...</div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <div id="status" class="status">Ready</div>
+    <div class="footer-links">
+      <a href="#" id="helpLink" class="link">Help</a>
+      <span class="separator">|</span>
+      <a href="https://chromeai.google.com/early-preview/" target="_blank" class="link">Enable AI</a>
+    </div>
+  </footer>
+</body>
+</html>

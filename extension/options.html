@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic Advocate Settings</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 20px; max-width: 720px; }
+    label { display: block; margin-top: 12px; font-weight: 600; }
+    select, input[type=text] { width: 100%; padding: 8px; box-sizing: border-box; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    button { margin-top: 16px; padding: 8px 12px; }
+    .hint { color: #666; font-size: 12px; }
+  </style>
+  <script type="module" src="options.js"></script>
+</head>
+<body>
+  <h1>Agentic Advocate Settings</h1>
+  <div class="row">
+    <div>
+      <label for="provider">API Provider</label>
+      <select id="provider">
+        <option value="chrome_built_in">Chrome Built-in AI (Gemini Nano)</option>
+        <option value="gemini_remote">Gemini Developer API (cloud fallback)</option>
+      </select>
+      <div class="hint">Default is on-device Chrome Built-in AI. Remote is optional.</div>
+    </div>
+    <div>
+      <label for="language">Preferred Language</label>
+      <select id="language">
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="ja">Japanese</option>
+        <option value="zh">Chinese</option>
+      </select>
+    </div>
+  </div>
+  <label for="apiKey">API Key (if remote)</label>
+  <input id="apiKey" type="text" placeholder="Optional: Gemini API Key for cloud fallback" />
+  <button id="saveBtn">Save Settings</button>
+  <div id="saveStatus" class="hint"></div>
+</body>
+</html>
+
+

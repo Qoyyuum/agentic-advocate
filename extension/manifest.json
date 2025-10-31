@@ -1,48 +1,41 @@
 {
   "manifest_version": 3,
   "name": "Agentic Advocate",
+  "description": "Legal document assistant with Chrome Built-in AI (Writer, Rewriter, Proofreader, Translator, Summarizer, Prompt).",
   "version": "1.0.0",
-  "description": "Automating legal, compliance, and tax tasks using Chrome's Built-in AI (Gemini Nano) with privacy-first, offline-capable workflows.",
+  "action": {
+    "default_title": "Agentic Advocate",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": [
     "storage",
-    "tabs",
-    "notifications",
-    "bookmarks",
     "activeTab",
-    "contextMenus",
-    "scripting"
+    "scripting",
+    "tabs",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "scripts/background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
+  "options_page": "options.html",
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["scripts/content.js"],
-      "css": ["styles/content.css"]
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "contentScript.js"
+      ],
+      "run_at": "document_idle"
     }
-  ],
-  "action": {
-    "default_popup": "pages/popup.html",
-    "default_icon": {
-      "16": "assets/icon16.png",
-      "48": "assets/icon48.png",
-      "128": "assets/icon128.png"
-    }
-  },
-  "icons": {
-    "16": "assets/icon16.png",
-    "48": "assets/icon48.png",
-    "128": "assets/icon128.png"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": ["assets/*", "pages/*", "styles/*", "scripts/*"],
-      "matches": ["<all_urls>"]
-    }
-  ],
-  "options_page": "pages/options.html"
+  ]
 }
