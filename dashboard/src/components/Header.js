@@ -29,7 +29,7 @@ export default function Header() {
               About
             </a>
             <a
-              href="https://github.com/adi0900/Google_Chrome25"
+              href="https://github.com/Qoyyuum/agentic-advocate"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-neon-cyan transition-colors"
@@ -63,7 +63,7 @@ export default function Header() {
               About
             </a>
             <a
-              href="https://github.com/adi0900/Google_Chrome25"
+              href="https://github.com/Qoyyuum/agentic-advocate"
               target="_blank"
               rel="noopener noreferrer"
               className="block text-muted-foreground hover:text-neon-cyan transition-colors py-2"

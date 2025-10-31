@@ -66,10 +66,12 @@ export default function CTA() {
             transition={{ duration: 0.5, delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8"
           >
-            <Button variant="neon" size="lg" className="gap-2 text-base">
-              <Download className="w-5 h-5" />
-              Install Now - It's Free
-            </Button>
+            <a href="https://github.com/Qoyyuum/agentic-advocate/releases" target="_blank" rel="noopener noreferrer">
+              <Button variant="neon" size="lg" className="gap-2 text-base">
+                <Download className="w-5 h-5" />
+                Install Now - It's Free
+              </Button>
+            </a>
             <Button variant="glass" size="lg" className="gap-2 text-base">
               <Github className="w-5 h-5" />
               View on GitHub
