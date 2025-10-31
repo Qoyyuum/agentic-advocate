@@ -405,6 +405,47 @@ async function sendMessage(message) {
 
   if (!message || isProcessing) return;
 
+  // Check if we're waiting for image analysis type selection
+  if (window.pendingImageAnalysis) {
+    const input = message.toLowerCase();
+    
+    // Handle cancel
+    if (input === 'cancel') {
+      delete window.pendingImageAnalysis;
+      addMessageToChat('Image analysis cancelled.', 'bot');
+      chatInput.value = '';
+      return;
+    }
+    
+    // Map user input to analysis type
+    const analysisTypeMap = {
+      '1': 'general',
+      '2': 'contract',
+      '3': 'document',
+      '4': 'form',
+      '5': 'evidence',
+      '6': 'id'
+    };
+    
+    const analysisType = analysisTypeMap[input];
+    
+    if (analysisType) {
+      const pendingFile = window.pendingImageAnalysis.file;
+      delete window.pendingImageAnalysis;
+      
+      addMessageToChat(message, 'user');
+      chatInput.value = '';
+      
+      // Process the image analysis
+      await processImageAnalysis(analysisType, pendingFile);
+      return;
+    } else {
+      addMessageToChat('Invalid selection. Please enter a number from 1-6, or type "cancel".', 'bot');
+      chatInput.value = '';
+      return;
+    }
+  }
+
   // Set processing flag
   isProcessing = true;
 
@@ -998,37 +1039,154 @@ async function handleFileRewriteUpload(event) {
     event.target.value = '';
   }
 }
-// Handle image upload
-function handleImageUpload(event) {
+// Handle image upload with AI analysis
+async function handleImageUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
+  // Validate file type
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    addMessageToChat('❌ Please upload a valid image file (JPEG, PNG, GIF, or WebP)', 'bot');
+    event.target.value = '';
+    return;
+  }
+
+  // Validate file size (max 20MB for Gemini API)
+  const maxSize = 20 * 1024 * 1024; // 20MB
+  if (file.size > maxSize) {
+    addMessageToChat('❌ Image file is too large. Please upload an image smaller than 20MB.', 'bot');
+    event.target.value = '';
+    return;
+  }
+
   closeUploadModal();
 
-  // Show upload in chat
-  addMessageToChat(`🖼️ Uploaded image: ${file.name}`, 'user');
+  // Show upload in chat with image preview
+  const userMessage = `🖼️ Uploaded image: ${file.name} (${formatFileSize(file.size)})`;
+  addMessageToChat(userMessage, 'user');
+
+  // Show analysis type selection
+  showImageAnalysisOptions(file);
+}
+
+// Format file size for display
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// Show image analysis options
+function showImageAnalysisOptions(file) {
+  const optionsMessage = `
+� What would you like me to analyze in this image?
+
+1️⃣ General Legal Analysis - Overall document review
+2️⃣ Contract Analysis - Extract terms, parties, obligations
+3️⃣ Document Extraction - OCR and text extraction
+4️⃣ Form Recognition - Identify and extract form fields
+5️⃣ Evidence Analysis - Objective assessment for legal use
+6️⃣ ID/License Verification - Extract ID information
+
+Please type the number (1-6) of your preferred analysis type, or type "cancel" to skip.
+  `.trim();
+
+  addMessageToChat(optionsMessage, 'bot');
+
+  // Store the file temporarily for analysis
+  window.pendingImageAnalysis = {
+    file: file,
+    timestamp: Date.now()
+  };
+}
+
+// Process image analysis based on user selection
+async function processImageAnalysis(analysisType, file) {
+  // Show loading message
+  addMessageToChat('🔍 Analyzing image... This may take a moment.', 'bot');
 
   // Read image as data URL
   const reader = new FileReader();
-  reader.onload = (e) => {
+  
+  reader.onload = async (e) => {
     const imageData = e.target.result;
 
-    // For now, just confirm upload (actual OCR/vision would require external API)
-    addMessageToChat('Image uploaded successfully. Image analysis feature coming soon!', 'bot');
+    try {
+      // Check if Gemini API is configured
+      const geminiAPI = new GeminiAPI();
+      const hasKey = await geminiAPI.hasApiKey();
+      
+      if (!hasKey) {
+        addMessageToChat('⚠️ Gemini API key not configured. Please configure your API key in settings to use image analysis.', 'bot');
+        return;
+      }
 
-    // TODO: Integrate with image analysis API
-    // chrome.runtime.sendMessage({
-    //   action: 'analyzeImage',
-    //   data: { image: imageData, filename: file.name }
-    // }, callback);
+      // Perform analysis
+      const result = await geminiAPI.analyzeImage(imageData, file.name, analysisType);
+      
+      // Display results
+      addMessageToChat('✅ Image Analysis Complete:', 'bot');
+      addMessageToChat(result, 'bot');
+
+      // Save to recent documents
+      saveAnalyzedImage(file.name, analysisType, result);
+
+    } catch (error) {
+      console.error('Image analysis error:', error);
+      let errorMessage = '❌ Image analysis failed. ';
+      
+      if (error.message.includes('API key')) {
+        errorMessage += 'Please configure your Gemini API key in settings.';
+      } else if (error.message.includes('quota')) {
+        errorMessage += 'API quota exceeded. Please try again later.';
+      } else if (error.message.includes('INVALID_ARGUMENT')) {
+        errorMessage += 'Image format not supported. Please try a different image.';
+      } else {
+        errorMessage += error.message || 'Please try again.';
+      }
+      
+      addMessageToChat(errorMessage, 'bot');
+    }
   };
 
   reader.onerror = () => {
-    addMessageToChat('Error reading image. Please try again.', 'bot');
+    addMessageToChat('❌ Error reading image file. Please try again with a different image.', 'bot');
   };
 
   reader.readAsDataURL(file);
-  event.target.value = ''; // Reset input
+}
+
+// Save analyzed image to recent documents
+function saveAnalyzedImage(filename, analysisType, result) {
+  chrome.storage.local.get(['recentDocuments'], (data) => {
+    const docs = data.recentDocuments || [];
+    
+    const analysisTypeNames = {
+      general: 'General Analysis',
+      contract: 'Contract Analysis',
+      document: 'Document Extraction',
+      form: 'Form Recognition',
+      evidence: 'Evidence Assessment',
+      id: 'ID Verification'
+    };
+
+    docs.unshift({
+      name: filename,
+      type: analysisTypeNames[analysisType] || 'Image Analysis',
+      date: new Date().toLocaleDateString(),
+      preview: result.substring(0, 100) + '...'
+    });
+
+    // Keep only last 10 documents
+    if (docs.length > 10) {
+      docs.pop();
+    }
+
+    chrome.storage.local.set({ recentDocuments: docs }, () => {
+      loadRecentDocuments();
+    });
+  });
 }
 
 // ============================================
