@@ -302,6 +302,9 @@ function setupEventListeners() {
   document.getElementById('configCancelBtn').addEventListener('click', closeConfigModal);
   document.getElementById('configSaveBtn').addEventListener('click', saveConfiguration);
 
+  document.getElementById('teamBtn').addEventListener('click', openTeam);
+  document.getElementById('helpBtn').addEventListener('click', openHelp);
+  document.getElementById('githubBtn').addEventListener('click', openGithub);
   // API key toggle
   document.getElementById('apiKeyToggle').addEventListener('click', toggleApiKeyVisibility);
 
