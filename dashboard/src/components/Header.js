@@ -11,21 +11,21 @@ export default function Header() {
     <header className="glass-panel sticky top-0 z-50 border-b border-white/12">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <a href="/" className="flex items-center space-x-3 no-underline">
             <div className="logo-glass rounded-xl p-2 animate-glow">
               <Bot className="w-7 h-7 text-neon-cyan drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]" strokeWidth={2} />
             </div>
             <span className="text-xl font-bold neon-text">Agentic Advocate</span>
-          </div>
+          </a>
 
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-muted-foreground hover:text-neon-cyan transition-colors">
+            <a href="/features" className="text-muted-foreground hover:text-neon-cyan transition-colors">
               Features
             </a>
-            <a href="#how-it-works" className="text-muted-foreground hover:text-neon-cyan transition-colors">
+            <a href="/how-it-works" className="text-muted-foreground hover:text-neon-cyan transition-colors">
               How It Works
             </a>
-            <a href="#about" className="text-muted-foreground hover:text-neon-cyan transition-colors">
+            <a href="/about" className="text-muted-foreground hover:text-neon-cyan transition-colors">
               About
             </a>
             <a
@@ -39,9 +39,11 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="neon" size="default" className="hidden md:inline-flex">
-              Get Started
-            </Button>
+            <a href="/get-started">
+              <Button variant="neon" size="default" className="hidden md:inline-flex">
+                Get Started
+              </Button>
+            </a>
             <button
               className="md:hidden text-foreground"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -53,13 +55,13 @@ export default function Header() {
 
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 space-y-3 animate-fadeIn">
-            <a href="#features" className="block text-muted-foreground hover:text-neon-cyan transition-colors py-2">
+            <a href="/features" className="block text-muted-foreground hover:text-neon-cyan transition-colors py-2">
               Features
             </a>
-            <a href="#how-it-works" className="block text-muted-foreground hover:text-neon-cyan transition-colors py-2">
+            <a href="/how-it-works" className="block text-muted-foreground hover:text-neon-cyan transition-colors py-2">
               How It Works
             </a>
-            <a href="#about" className="block text-muted-foreground hover:text-neon-cyan transition-colors py-2">
+            <a href="/about" className="block text-muted-foreground hover:text-neon-cyan transition-colors py-2">
               About
             </a>
             <a
@@ -70,9 +72,6 @@ export default function Header() {
             >
               GitHub
             </a>
-            <Button variant="neon" size="default" className="w-full">
-              Get Started
-            </Button>
           </div>
         )}
       </nav>
