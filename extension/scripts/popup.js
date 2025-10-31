@@ -462,13 +462,20 @@ async function sendMessage(message) {
     const myconfiglanguage = await chrome.storage.local.get('language');
     const outputLanguage = myconfiglanguage.language || 'en';
     
-    // Handle downloadable state - trigger download
+    // Handle downloadable state - trigger download (first-time setup)
     if (available === 'after-download' || available === 'downloadable') {
       addMessageToChat('📥 Downloading AI model for the first time. This may take a few minutes. Please wait...', 'bot');
       // The create() call will trigger the download
     }
     
-    if (available === 'readily' || available === 'after-download' || available === 'downloadable') {
+    // Proceed when the model is ready or will be downloaded on-demand
+    // Some Chrome versions report 'available' instead of 'readily'
+    if (
+      available === 'available' ||
+      available === 'readily' ||
+      available === 'after-download' ||
+      available === 'downloadable'
+    ) {
       // Check if aborted before creating session
       if (aiRequestAbortController.signal.aborted) {
         throw new Error('Request aborted');
