@@ -45,13 +45,13 @@ export default function Footer() {
             <h3 className="font-semibold mb-4 text-foreground">Quick Links</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#features" className="flex items-center gap-2 text-muted-foreground hover:text-neon-cyan transition-colors group">
+                <a href="/features" className="flex items-center gap-2 text-muted-foreground hover:text-neon-cyan transition-colors group">
                   <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   Features
                 </a>
               </li>
               <li>
-                <a href="#how-it-works" className="flex items-center gap-2 text-muted-foreground hover:text-neon-cyan transition-colors group">
+                <a href="/how-it-works" className="flex items-center gap-2 text-muted-foreground hover:text-neon-cyan transition-colors group">
                   <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   How It Works
                 </a>
@@ -69,7 +69,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center gap-2 text-muted-foreground hover:text-neon-cyan transition-colors group">
+                <a href="/documentation" className="flex items-center gap-2 text-muted-foreground hover:text-neon-cyan transition-colors group">
                   <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   Documentation
                 </a>
@@ -98,19 +98,19 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center gap-2 text-muted-foreground hover:text-neon-purple transition-colors group">
+                <a href="/privacy-policy" className="flex items-center gap-2 text-muted-foreground hover:text-neon-purple transition-colors group">
                   <Shield className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center gap-2 text-muted-foreground hover:text-neon-purple transition-colors group">
+                <a href="/terms-of-service" className="flex items-center gap-2 text-muted-foreground hover:text-neon-purple transition-colors group">
                   <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   Terms of Service
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center gap-2 text-muted-foreground hover:text-neon-purple transition-colors group">
+                <a href="/license" className="flex items-center gap-2 text-muted-foreground hover:text-neon-purple transition-colors group">
                   <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   License
                 </a>
