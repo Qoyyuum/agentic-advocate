@@ -31,7 +31,7 @@ function initIcons() {
 
   // Chat quick action icons - Analyze Page & Legal Summarizer
   document.getElementById('analyzePageIcon').appendChild(createIcon('search', 18));
-  document.getElementById('legalSummarizerIcon').appendChild(createIcon('scale', 18));
+  document.getElementById('legalDocumenterIcon').appendChild(createIcon('scale', 18));
 
   // Document summary icons
   document.getElementById('summaryIcon').appendChild(createIcon('fileText', 16));
@@ -282,7 +282,15 @@ function setupEventListeners() {
 
   // Chat quick action buttons - Analyze Page & Legal Summarizer
   document.getElementById('analyzePageBtn').addEventListener('click', analyzePage);
-  // document.getElementById('legalSummarizerBtn').addEventListener('click', legalSummarizer);
+
+  const legalDocumenterBtn = document.getElementById('legalDocumenterBtn');
+  legalDocumenterBtn.addEventListener('click', legalDocumenter);
+  legalDocumenterBtn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      legalDocumenter();
+    }
+  });
 
   // Document summary close button
   const summaryCloseBtn = document.getElementById('summaryCloseBtn');
@@ -327,6 +335,7 @@ function setupEventListeners() {
 // Debounce helper
 let sendMessageTimeout = null;
 let isProcessing = false;
+let legalDocumenterActive = false;
 
 // Auto-expand textarea
 function autoExpandTextarea(event) {
@@ -404,8 +413,92 @@ async function sendMessage(message) {
 
   // Save to chat history
   saveChatMessage(message, 'user');
+  
+  // If Legal Documenter is active, use user's message as Writer input and save file
+  if (legalDocumenterActive) {
+    try {
+      // Request save location immediately to preserve user gesture
+      if (!('showSaveFilePicker' in window)) {
+        addMessageToChat('File System Access API is not supported in this context.', 'bot');
+        // turn off mode and UI, then exit
+        legalDocumenterActive = false;
+        const legalBtnEarly = document.getElementById('legalDocumenterBtn');
+        if (legalBtnEarly) legalBtnEarly.classList.remove('active');
+        isProcessing = false;
+        return;
+      }
 
-  // Process with AI
+      const nowIso = new Date().toISOString();
+      const datePart = nowIso.split('T')[0].replace(/-/g, '');
+      const timePart = nowIso.split('T')[1].split('.')[0];
+      const handle = await window.showSaveFilePicker({
+        suggestedName: `legal-document-${datePart}-${timePart}.txt`,
+        types: [
+          { description: 'Text Files', accept: { 'text/plain': ['.txt'] } },
+        ],
+      });
+
+      // Safe to await other async work after picker
+      const myconfiglanguage = await chrome.storage.local.get('language');
+
+      const writerOptions = {
+        sharedContext: 'Agentic Advocate legal document generator.',
+        tone: 'formal',
+        format: 'plain-text',
+        length: 'long',
+        outputLanguage: myconfiglanguage.language,
+      };
+
+      const writerAvailability = await Writer.availability();
+      let writer;
+      if (writerAvailability === 'unavailable') {
+        addMessageToChat('Writer API is not available.', 'bot');
+      } else if (writerAvailability === 'available') {
+        writer = await Writer.create(writerOptions);
+      } else {
+        writer = await Writer.create({
+          ...writerOptions,
+          monitor(m) {
+            m.addEventListener('downloadprogress', (e) => {
+              console.log(`Downloaded ${e.loaded * 100}%`);
+            });
+          }
+        });
+      }
+
+      if (writer) {
+        addMessageToChat('Generating legal document. Please wait...', 'bot');
+        const legalDocumenterContent = await writer.write(
+          message,
+          {
+            context: 'Act as a legal documenter. Generate a clear, formal legal document based on the user\'s prompt.'
+          }
+        );
+
+        const writable = await handle.createWritable();
+        await writable.write(legalDocumenterContent);
+        await writable.close();
+
+        addMessageToChat('Saved legal document to your chosen location.', 'bot');
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') {
+        addMessageToChat('Save canceled.', 'bot');
+      } else {
+        console.error('Legal Documenter error:', err);
+        addMessageToChat('Failed to generate or save the legal document.', 'bot');
+      }
+    } finally {
+      // turn off mode and update UI
+      legalDocumenterActive = false;
+      const legalBtn = document.getElementById('legalDocumenterBtn');
+      if (legalBtn) legalBtn.classList.remove('active');
+      isProcessing = false;
+    }
+    return;
+  }
+
+  // Process with AI (normal chat flow)
   const { defaultTemperature, maxTemperature, defaultTopK, maxTopK } = await LanguageModel.params();
 
   const available = await LanguageModel.availability();
@@ -592,6 +685,19 @@ async function analyzePage() {
       }
     });
   });
+}
+
+// Quick action: Legal Documenter (toggle mode to use next chat input)
+async function legalDocumenter() {
+  const btn = document.getElementById('legalDocumenterBtn');
+  legalDocumenterActive = !legalDocumenterActive;
+  if (btn) btn.classList.toggle('active', legalDocumenterActive);
+
+  if (legalDocumenterActive) {
+    addMessageToChat('Legal Documenter enabled. Send your prompt in chat and I will generate a document and prompt you to save it.', 'bot');
+  } else {
+    addMessageToChat('Legal Documenter disabled.', 'bot');
+  }
 }
 
 
