@@ -22,22 +22,23 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
 async function initializeAI() {
   try {
     console.log('Initializing Agentic Advocate AI capabilities...');
-    
-    // Check if AI APIs are available
-    const aiAvailable = 'ai' in window || 'LanguageModel' in window;
+
+    // Check if AI APIs are available (safe for Service Workers)
+    const globalScope = typeof self !== 'undefined' ? self : globalThis;
+    const aiAvailable = 'ai' in globalScope || 'LanguageModel' in globalScope;
+
     console.log('AI APIs available:', aiAvailable);
-    
+
     // Store AI availability in local storage
-    await chrome.storage.local.set({ 
+    await chrome.storage.local.set({
       aiAvailable,
-      initTimestamp: Date.now() 
+      initTimestamp: Date.now(),
     });
-    
   } catch (error) {
     console.error('Failed to initialize AI:', error);
-    await chrome.storage.local.set({ 
+    await chrome.storage.local.set({
       aiAvailable: false,
-      error: error.message 
+      error: error.message,
     });
   }
 }
