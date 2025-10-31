@@ -104,6 +104,114 @@
       </div>
     </div>
 
+    <!-- Document Generator Section -->
+    <div class="doc-generator-section glass-panel" id="docGeneratorSection">
+      <div class="section-header">
+        <div class="section-icon" id="docGenIcon"></div>
+        <h3 class="section-title">Document Generator</h3>
+      </div>
+      
+      <!-- AI Action Type Selector -->
+      <div class="ai-action-selector">
+        <button class="action-tab active" data-action="writer" id="writerTab">
+          <span class="action-icon">✍️</span>
+          <span>Writer</span>
+        </button>
+        <button class="action-tab" data-action="rewriter" id="rewriterTab">
+          <span class="action-icon">🔄</span>
+          <span>Rewriter</span>
+        </button>
+        <button class="action-tab" data-action="proofreader" id="proofreaderTab">
+          <span class="action-icon">✅</span>
+          <span>Proofreader</span>
+        </button>
+      </div>
+      
+      <div class="doc-gen-controls">
+        <!-- Writer Mode -->
+        <div id="writerMode" class="mode-content active">
+          <div class="doc-type-selector">
+            <label for="docTypeSelector" class="form-label">Document Type</label>
+            <select id="docTypeSelector" class="form-select">
+              <option value="contract">Contract</option>
+              <option value="invoice">Invoice</option>
+              <option value="agreement">Agreement</option>
+              <option value="nda">Non-Disclosure Agreement</option>
+              <option value="terms">Terms of Service</option>
+            </select>
+          </div>
+          
+          <div class="doc-context-input">
+            <label for="docContextInput" class="form-label">Context / Description</label>
+            <textarea 
+              id="docContextInput" 
+              class="form-textarea" 
+              placeholder="Describe your document (e.g., 'Create a software development NDA between a client and developer')"
+              rows="3"
+            ></textarea>
+          </div>
+          
+          <button id="generateDocBtn" class="neon-btn full-width">
+            <span>✨ Generate Document</span>
+          </button>
+        </div>
+        
+        <!-- Rewriter Mode -->
+        <div id="rewriterMode" class="mode-content">
+          <div class="doc-context-input">
+            <label for="rewriterInput" class="form-label">Text to Rewrite</label>
+            <textarea 
+              id="rewriterInput" 
+              class="form-textarea" 
+              placeholder="Paste the text you want to rewrite..."
+              rows="4"
+            ></textarea>
+          </div>
+          
+          <div class="doc-type-selector">
+            <label for="rewriteGoal" class="form-label">Rewrite Goal</label>
+            <input 
+              id="rewriteGoal" 
+              class="form-input" 
+              placeholder="e.g., 'Make it more professional' or 'Simplify the language'"
+            />
+          </div>
+          
+          <button id="rewriteBtn" class="neon-btn full-width">
+            <span>🔄 Rewrite Text</span>
+          </button>
+        </div>
+        
+        <!-- Proofreader Mode -->
+        <div id="proofreaderMode" class="mode-content">
+          <div class="doc-context-input">
+            <label for="proofreaderInput" class="form-label">Text to Proofread</label>
+            <textarea 
+              id="proofreaderInput" 
+              class="form-textarea" 
+              placeholder="Paste the text you want to proofread for grammar, spelling, and legal accuracy..."
+              rows="5"
+            ></textarea>
+          </div>
+          
+          <button id="proofreadBtn" class="neon-btn full-width">
+            <span>✅ Proofread Document</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="doc-output-container" id="docOutputContainer" style="display: none;">
+        <div class="doc-output-header">
+          <span>Generated Document</span>
+          <div class="doc-actions">
+            <button id="copyDocBtn" class="btn-small">Copy</button>
+            <button id="downloadDocBtn" class="btn-small">Download</button>
+          </div>
+        </div>
+        <div class="doc-output" id="docOutput"></div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer glass-panel">
       <button class="footer-btn" id="configBtn" aria-label="Open configuration">
