@@ -324,6 +324,38 @@ function setupEventListeners() {
 // Debounce helper
 let sendMessageTimeout = null;
 let isProcessing = false;
+let aiRequestAbortController = null;
+
+// Show loading animation
+function showLoader() {
+  const loader = document.getElementById('chatLoader');
+  if (loader) {
+    loader.style.display = 'flex';
+    // Scroll to show loader
+    const chatSection = document.querySelector('.chat-section');
+    if (chatSection) {
+      setTimeout(() => {
+        loader.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+  }
+}
+
+// Hide loading animation
+function hideLoader() {
+  const loader = document.getElementById('chatLoader');
+  if (loader) {
+    loader.style.display = 'none';
+  }
+}
+
+// Show timeout error message
+function showTimeoutError() {
+  addMessageToChat(
+    'Request timed out. The AI took too long to respond. Please try again with a shorter message or check your connection.',
+    'bot'
+  );
+}
 
 // Auto-expand textarea
 function autoExpandTextarea(event) {
@@ -402,36 +434,98 @@ async function sendMessage(message) {
   // Save to chat history
   saveChatMessage(message, 'user');
 
-  // Process with AI
-  const { defaultTemperature, maxTemperature, defaultTopK, maxTopK } = await LanguageModel.params();
+  // Show loading animation
+  showLoader();
 
-  const available = await LanguageModel.availability();
-  const myconfiglanguage = await chrome.storage.local.get('language');
-  if (available !== 'unavailable') {
-    const session = await LanguageModel.create({
-       initialPrompts: [
-        { role: 'system', content: 'You are Agentic Advocate, a helpful and friendly legal assistant advising the user on legal jargons and whether the content that they are reading is safe or risky to the user. Keep your responses formal and professional whilst keeping it short and simple for the user to understand like they are non-legal professionals.' },
-    ],
-    expectedInputs: [
-      { type: 'text' },
-      { type: 'image' },
-      { type: 'audio' },
-    ],
-    expectedOutputs: [
-      { type: 'text', language: [myconfiglanguage.language] },
-    ],
-    });
+  // Create AbortController for timeout
+  aiRequestAbortController = new AbortController();
+  const timeoutId = setTimeout(() => {
+    if (aiRequestAbortController) {
+      aiRequestAbortController.abort();
+    }
+  }, 60000); // 60 second timeout
+
+  try {
+    // Check if LanguageModel API is available
+    if (typeof LanguageModel === 'undefined' || !LanguageModel) {
+      throw new Error('LanguageModel API not available');
+    }
+
+    // Process with AI
+    const available = await LanguageModel.availability();
+    console.log('LanguageModel availability:', available);
     
-    const sourcelanguage = await detectLanguage(message);
-    const translatedmessage = await translateLanguage(sourcelanguage, message);
+    if (available === 'no') {
+      throw new Error('LanguageModel not available on this device');
+    }
+    
+    const myconfiglanguage = await chrome.storage.local.get('language');
+    const outputLanguage = myconfiglanguage.language || 'en';
+    
+    // Handle downloadable state - trigger download
+    if (available === 'after-download' || available === 'downloadable') {
+      addMessageToChat('📥 Downloading AI model for the first time. This may take a few minutes. Please wait...', 'bot');
+      // The create() call will trigger the download
+    }
+    
+    if (available === 'readily' || available === 'after-download' || available === 'downloadable') {
+      // Check if aborted before creating session
+      if (aiRequestAbortController.signal.aborted) {
+        throw new Error('Request aborted');
+      }
 
+      const session = await LanguageModel.create({
+        systemPrompt: 'You are Agentic Advocate, a helpful and friendly legal assistant advising the user on legal jargons and whether the content that they are reading is safe or risky to the user. Keep your responses formal and professional whilst keeping it short and simple for the user to understand like they are non-legal professionals.',
+        temperature: 0.8,
+        topK: 3,
+        language: outputLanguage, // Specify output language (en, es, or ja)
+      });
+      
+      // Check if aborted before language detection
+      if (aiRequestAbortController.signal.aborted) {
+        throw new Error('Request aborted');
+      }
 
-    // Prompt the model 
-    const stream = await session.prompt([{ role: 'user', content: translatedmessage }]);
-    addMessageToChat(stream, 'bot');
+      // Check if aborted before prompting
+      if (aiRequestAbortController.signal.aborted) {
+        throw new Error('Request aborted');
+      }
+
+      // Prompt the model
+      const result = await session.prompt(message);
+      
+      // Check if aborted after receiving response
+      if (aiRequestAbortController.signal.aborted) {
+        throw new Error('Request aborted');
+      }
+
+      addMessageToChat(result, 'bot');
+    } else {
+      addMessageToChat('AI is currently unavailable. Please check your settings or try again later.', 'bot');
+    }
+  } catch (error) {
+    console.error('AI request error:', error);
+    if (error.message === 'Request aborted' || error.name === 'AbortError') {
+      showTimeoutError();
+    } else if (error.name === 'NotAllowedError' || error.message.includes('not available')) {
+      addMessageToChat(
+        '⚠️ Chrome Built-in AI is not available. Please enable it in chrome://flags or configure a Gemini API key in Settings.',
+        'bot'
+      );
+    } else {
+      addMessageToChat(
+        `An error occurred: ${error.message || 'Unknown error'}. Please try again or check your settings.`,
+        'bot'
+      );
+    }
+  } finally {
+    // Clear timeout and hide loader
+    clearTimeout(timeoutId);
+    hideLoader();
+    aiRequestAbortController = null;
+    // Reset processing flag
+    isProcessing = false;
   }
-  // Reset processing flag
-  isProcessing = false;
 }
 
 // Add message to chat container
@@ -660,7 +754,14 @@ function startVoiceInput() {
   recognition.onerror = (event) => {
     console.error('Speech recognition error:', event.error);
     stopVoiceInput();
-    addMessageToChat('Voice recognition error. Please try again.', 'bot');
+    
+    if (event.error === 'not-allowed') {
+      addMessageToChat('⚠️ Microphone access denied. Please allow microphone permissions in your browser settings.', 'bot');
+    } else if (event.error === 'no-speech') {
+      addMessageToChat('No speech detected. Please try again.', 'bot');
+    } else {
+      addMessageToChat(`Voice recognition error: ${event.error}. Please try again.`, 'bot');
+    }
   };
 
   recognition.onend = () => {
