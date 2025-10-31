@@ -395,6 +395,62 @@ html.light .message-icon svg {
   background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(157, 78, 221, 0.15));
 }
 
+/* Chat Loader */
+.chat-loader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  background: rgba(157, 78, 221, 0.05);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.3s ease;
+}
+
+.loader-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.loader-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top-color: var(--neon-cyan);
+  border-right-color: var(--neon-purple);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+html.light .chat-loader {
+  background: rgba(139, 92, 246, 0.05);
+}
+
+html.light .loader-spinner {
+  border-top-color: var(--neon-cyan);
+  border-right-color: var(--neon-purple);
+}
+
 /* Chat Input */
 .chat-input-wrapper {
   display: flex;
