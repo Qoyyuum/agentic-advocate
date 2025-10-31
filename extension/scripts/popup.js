@@ -57,6 +57,9 @@ function initIcons() {
   
   // Team modal icons
   initTeamIcons();
+  
+  // Help modal icons
+  initHelpIcons();
 }
 
 // Initialize team modal icons
@@ -65,6 +68,15 @@ function initTeamIcons() {
   
   if (teamCloseIcon) {
     teamCloseIcon.appendChild(createIcon('x', 16));
+  }
+}
+
+// Initialize help modal icons
+function initHelpIcons() {
+  const helpCloseIcon = document.getElementById('helpCloseIcon');
+  
+  if (helpCloseIcon) {
+    helpCloseIcon.appendChild(createIcon('x', 16));
   }
 }
 
@@ -324,6 +336,16 @@ function setupEventListeners() {
   document.getElementById('teamBtn').addEventListener('click', openTeamModal);
   document.getElementById('teamCloseBtn').addEventListener('click', closeTeamModal);
   document.getElementById('teamCloseFooterBtn').addEventListener('click', closeTeamModal);
+  
+  // Help modal
+  document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+  document.getElementById('helpCloseBtn').addEventListener('click', closeHelpModal);
+  document.getElementById('helpCloseFooterBtn').addEventListener('click', closeHelpModal);
+  
+  // GitHub button - open GitHub in new tab
+  document.getElementById('githubBtn').addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://github.com/Qoyyuum/agentic-advocate' });
+  });
   
   // Document generator action tabs
   document.getElementById('writerTab').addEventListener('click', () => switchActionMode('writer'));
@@ -941,6 +963,23 @@ function openTeamModal() {
 // Close team modal
 function closeTeamModal() {
   const modal = document.getElementById('teamModal');
+  modal.classList.remove('show');
+}
+
+// ============================================
+// HELP MODAL
+// ============================================
+
+// Open help modal
+function openHelpModal() {
+  console.log("Open Help Modal")
+  const modal = document.getElementById('helpModal');
+  modal.classList.add('show');
+}
+
+// Close help modal
+function closeHelpModal() {
+  const modal = document.getElementById('helpModal');
   modal.classList.remove('show');
 }
 
