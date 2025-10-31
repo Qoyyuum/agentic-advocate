@@ -54,6 +54,21 @@ async function init() {
   els.btnAnalyzePage?.addEventListener('click', onAnalyzePage);
   els.btnSummarizeInput?.addEventListener('click', onSummarizeInput);
 
+  // Check AI availability and log diagnostics
+  try {
+    const { checkChromeAIAvailability } = await import('./ai.js');
+    const diagnostics = await checkChromeAIAvailability();
+    console.log('🔍 Agentic Advocate - AI Diagnostics:', diagnostics);
+    
+    if (!diagnostics.available && !diagnostics.background?.available) {
+      console.warn('⚠️ Chrome Built-in AI is not available. Check settings or enable Chrome AI flags.');
+    } else {
+      console.log('✅ Chrome Built-in AI is available!');
+    }
+  } catch (error) {
+    console.error('Error checking AI availability:', error);
+  }
+
   setStatus('Ready');
 }
 
@@ -75,8 +90,15 @@ async function onQuickSend() {
     const settings = await loadSettings();
     const systemPrompt = `You are a legal assistant. Be precise, neutral, and cite sections when helpful.`;
     const response = await promptModel({ systemPrompt, userPrompt, settings });
-    setOutput(els.quickOutput, response || 'No response generated');
-    setStatus('Ready', 'success');
+    
+    // Check if response is an error message (starts with ❌ or 🔑)
+    if (response && (response.startsWith('❌') || response.startsWith('🔑'))) {
+      setError(els.quickOutput, response);
+      setStatus('Configuration needed', 'error');
+    } else {
+      setOutput(els.quickOutput, response || 'No response generated');
+      setStatus('Ready', 'success');
+    }
   } catch (e) {
     console.error('QuickSend error:', e);
     const errorMsg = e?.message || String(e);
