@@ -40,6 +40,9 @@ function initIcons() {
   // Documents icon
   document.getElementById('documentsIcon').appendChild(createIcon('fileText', 16));
 
+  // Document generator icon
+  document.getElementById('docGenIcon').appendChild(createIcon('fileText', 16));
+
   // Footer icons
   document.getElementById('configIcon').appendChild(createIcon('settings', 16));
   document.getElementById('teamIcon').appendChild(createIcon('users', 16));
@@ -304,6 +307,18 @@ function setupEventListeners() {
 
   // API key toggle
   document.getElementById('apiKeyToggle').addEventListener('click', toggleApiKeyVisibility);
+  
+  // Document generator action tabs
+  document.getElementById('writerTab').addEventListener('click', () => switchActionMode('writer'));
+  document.getElementById('rewriterTab').addEventListener('click', () => switchActionMode('rewriter'));
+  document.getElementById('proofreaderTab').addEventListener('click', () => switchActionMode('proofreader'));
+  
+  // Document generator buttons
+  document.getElementById('generateDocBtn').addEventListener('click', generateDocument);
+  document.getElementById('rewriteBtn').addEventListener('click', rewriteDocument);
+  document.getElementById('proofreadBtn').addEventListener('click', proofreadDocument);
+  document.getElementById('copyDocBtn').addEventListener('click', copyGeneratedDoc);
+  document.getElementById('downloadDocBtn').addEventListener('click', downloadGeneratedDoc);
 
   // Close modals on escape key
   document.addEventListener('keydown', (e) => {
@@ -893,4 +908,225 @@ function toggleApiKeyVisibility() {
     toggleIcon.innerHTML = '';
     toggleIcon.appendChild(createIcon('eye', 16));
   }
+}
+
+// Switch between action modes (writer, rewriter, proofreader)
+function switchActionMode(mode) {
+  // Hide all mode contents
+  document.getElementById('writerMode').classList.remove('active');
+  document.getElementById('rewriterMode').classList.remove('active');
+  document.getElementById('proofreaderMode').classList.remove('active');
+  document.getElementById('writerTab').classList.remove('active');
+  document.getElementById('rewriterTab').classList.remove('active');
+  document.getElementById('proofreaderTab').classList.remove('active');
+  
+  // Show selected mode
+  document.getElementById(mode + 'Mode').classList.add('active');
+  document.getElementById(mode + 'Tab').classList.add('active');
+  
+  // Hide output if switching modes
+  document.getElementById('docOutputContainer').style.display = 'none';
+}
+
+// Generate document
+async function generateDocument() {
+  const docType = document.getElementById('docTypeSelector').value;
+  const context = document.getElementById('docContextInput').value.trim();
+  
+  if (!context) {
+    alert('Please provide a description for your document.');
+    return;
+  }
+  
+  const button = document.getElementById('generateDocBtn');
+  const originalText = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<span>⚡ Generating...</span>';
+  
+  try {
+    chrome.runtime.sendMessage({
+      type: 'AA_DOCUMENT_GENERATE',
+      task: 'document_generation',
+      docType,
+      context
+    }, (response) => {
+      button.disabled = false;
+      button.innerHTML = originalText;
+      
+      if (chrome.runtime.lastError) {
+        console.error('Error:', chrome.runtime.lastError);
+        showDocOutput('❌ Error: Could not generate document. Please try again.');
+        return;
+      }
+      
+      if (response && response.success) {
+        showDocOutput(response.output);
+      } else {
+        // Show the actual error message if available
+        const errorMsg = response?.output || '❌ Failed to generate document. Please try again.';
+        showDocOutput(errorMsg);
+      }
+    });
+  } catch (error) {
+    console.error('Error generating document:', error);
+    button.disabled = false;
+    button.innerHTML = originalText;
+    showDocOutput('❌ Error: ' + error.message);
+  }
+}
+
+// Rewrite document
+async function rewriteDocument() {
+  const text = document.getElementById('rewriterInput').value.trim();
+  const goal = document.getElementById('rewriteGoal').value.trim();
+  
+  if (!text) {
+    alert('Please provide text to rewrite.');
+    return;
+  }
+  
+  const button = document.getElementById('rewriteBtn');
+  const originalText = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<span>⚡ Rewriting...</span>';
+  
+  try {
+    chrome.runtime.sendMessage({
+      type: 'AA_DOCUMENT_GENERATE',
+      task: 'rewrite',
+      text,
+      goal
+    }, (response) => {
+      button.disabled = false;
+      button.innerHTML = originalText;
+      
+      if (chrome.runtime.lastError) {
+        console.error('Error:', chrome.runtime.lastError);
+        showDocOutput('❌ Error: Could not rewrite text. Please try again.');
+        return;
+      }
+      
+      if (response && response.success) {
+        showDocOutput(response.output);
+      } else {
+        // Show the actual error message if available
+        const errorMsg = response?.output || '❌ Failed to rewrite text. Please try again.';
+        showDocOutput(errorMsg);
+      }
+    });
+  } catch (error) {
+    console.error('Error rewriting:', error);
+    button.disabled = false;
+    button.innerHTML = originalText;
+    showDocOutput('❌ Error: ' + error.message);
+  }
+}
+
+// Proofread document
+async function proofreadDocument() {
+  const text = document.getElementById('proofreaderInput').value.trim();
+  
+  if (!text) {
+    alert('Please provide text to proofread.');
+    return;
+  }
+  
+  const button = document.getElementById('proofreadBtn');
+  const originalText = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<span>⚡ Proofreading...</span>';
+  
+  try {
+    chrome.runtime.sendMessage({
+      type: 'AA_DOCUMENT_GENERATE',
+      task: 'proofread',
+      text
+    }, (response) => {
+      button.disabled = false;
+      button.innerHTML = originalText;
+      
+      if (chrome.runtime.lastError) {
+        console.error('Error:', chrome.runtime.lastError);
+        showDocOutput('❌ Error: Could not proofread text. Please try again.');
+        return;
+      }
+      
+      if (response && response.success) {
+        showDocOutput(response.output);
+      } else {
+        // Show the actual error message if available
+        const errorMsg = response?.output || '❌ Failed to proofread text. Please try again.';
+        showDocOutput(errorMsg);
+      }
+    });
+  } catch (error) {
+    console.error('Error proofreading:', error);
+    button.disabled = false;
+    button.innerHTML = originalText;
+    showDocOutput('❌ Error: ' + error.message);
+  }
+}
+
+// Show output in document output container
+function showDocOutput(content) {
+  document.getElementById('docOutput').textContent = content;
+  document.getElementById('docOutputContainer').style.display = 'block';
+  
+  // Scroll to output
+  document.getElementById('docOutputContainer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Copy generated document
+function copyGeneratedDoc() {
+  const output = document.getElementById('docOutput').textContent;
+  navigator.clipboard.writeText(output).then(() => {
+    const button = document.getElementById('copyDocBtn');
+    const originalText = button.textContent;
+    button.textContent = 'Copied!';
+    button.disabled = true;
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.disabled = false;
+    }, 2000);
+  }).catch(err => {
+    console.error('Failed to copy:', err);
+    alert('Failed to copy to clipboard');
+  });
+}
+
+// Download generated document
+function downloadGeneratedDoc() {
+  const output = document.getElementById('docOutput').textContent;
+  const docType = document.getElementById('docTypeSelector').value;
+  
+  // Create a blob with the document content
+  const blob = new Blob([output], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  
+  // Create a download link
+  const link = document.createElement('a');
+  link.href = url;
+  
+  // Generate filename with timestamp
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+  const filename = `${docType || 'document'}_${timestamp}.txt`;
+  link.download = filename;
+  
+  // Trigger download
+  document.body.appendChild(link);
+  link.click();
+  
+  // Clean up
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  
+  // Show feedback
+  const button = document.getElementById('downloadDocBtn');
+  const originalText = button.textContent;
+  button.textContent = 'Downloaded!';
+  button.disabled = true;
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.disabled = false;
+  }, 2000);
 }

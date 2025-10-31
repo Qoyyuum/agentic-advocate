@@ -60,9 +60,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 // Handle messages from content scripts and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('Background received message:', request.action);
+  console.log('Background received message:', request.action || request.type);
 
-  switch (request.action) {
+  switch (request.action || request.type) {
     case 'getAICapabilities':
       checkAICapabilities().then(sendResponse);
       return true;
@@ -86,6 +86,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
       return true;
 
+    case 'AA_DOCUMENT_GENERATE':
+      processDocumentGeneration(request).then(sendResponse);
+      return true;
+
     default:
       sendResponse({ error: 'Unknown action' });
   }
@@ -95,9 +99,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Check Chrome Built-in AI capabilities
 async function checkAICapabilities() {
   try {
-    // Service workers don't have access to window object
-    // Check if AI APIs are available via self (worker global)
-    if (typeof self !== 'undefined' && 'LanguageModel' in self) {
+    // Service workers don't have access to window object, use self/globalThis
+    // Check multiple possible locations for LanguageModel
+    const hasLanguageModel = typeof self !== 'undefined' && (
+      ('LanguageModel' in self && typeof self.LanguageModel !== 'undefined') ||
+      (self.ai && self.ai.languageModel) ||
+      (self.LanguageModel && typeof self.LanguageModel.create !== 'undefined')
+    );
+    
+    if (hasLanguageModel) {
       return {
         available: true,
         mode: 'local',
@@ -131,6 +141,129 @@ async function processWithGeminiNano(data) {
   } catch (error) {
     console.error('Error processing with AI:', error);
     return { success: false, error: error.message };
+  }
+}
+
+// Process document generation requests
+async function processDocumentGeneration(request) {
+  try {
+    const { task, docType, context, text, goal } = request;
+    
+    // Check if Chrome Built-in AI is available (multiple possible locations)
+    let LanguageModel;
+    if (typeof self !== 'undefined' && self.LanguageModel) {
+      LanguageModel = self.LanguageModel;
+    } else if (typeof self !== 'undefined' && self.ai && self.ai.languageModel) {
+      // Fallback to self.ai.languageModel if self.LanguageModel doesn't exist
+      LanguageModel = self.ai.languageModel;
+    }
+    
+    console.log('LanguageModel availability check:', {
+      hasSelf: typeof self !== 'undefined',
+      hasSelfLanguageModel: typeof self !== 'undefined' && self.LanguageModel,
+      hasSelfAI: typeof self !== 'undefined' && self.ai,
+      LanguageModelExists: !!LanguageModel
+    });
+    
+    if (!LanguageModel || typeof LanguageModel.create === 'undefined') {
+      console.error('LanguageModel not available', { 
+        hasSelf: typeof self !== 'undefined',
+        hasSelfLanguageModel: typeof self !== 'undefined' && self.LanguageModel,
+        hasSelfAI: typeof self !== 'undefined' && self.ai
+      });
+      return {
+        success: false,
+        output: '❌ Chrome Built-in AI not available. Please enable it in Chrome Canary settings.'
+      };
+    }
+    
+    let prompt = '';
+    
+    // Construct appropriate prompt based on task
+    if (task === 'document_generation') {
+      const docTypeMap = {
+        'contract': 'a professional business contract',
+        'invoice': 'an invoice document',
+        'agreement': 'a legal agreement',
+        'nda': 'a Non-Disclosure Agreement (NDA)',
+        'terms': 'a Terms of Service document'
+      };
+      
+      const specificDocType = docTypeMap[docType] || 'a legal document';
+      
+      prompt = `You are a legal document generator. Create ${specificDocType} with the following details:
+
+${context || text}
+
+Create a complete, ready-to-use document with:
+1. A clear title
+2. Proper introductory clauses
+3. All standard sections for this type of document
+4. Specific details based on the requirements provided
+5. Appropriate closing and signature lines
+
+Use formal legal language, ensure clarity, and make it comprehensive yet practical.`;
+      
+    } else if (task === 'rewrite') {
+      prompt = `Rewrite the following text to make it ${goal || 'more professional and clear'}:
+      
+${text}
+
+Please maintain the original meaning while improving clarity, professionalism, and effectiveness.`;
+      
+    } else if (task === 'proofread') {
+      prompt = `Proofread the following legal text and fix any grammar, spelling, punctuation, or legal terminology errors. Highlight any corrections made:
+      
+${text}
+
+Provide the corrected version with notes on what was changed.`;
+    }
+    
+    if (!prompt) {
+      return {
+        success: false,
+        output: '❌ Invalid task type specified.'
+      };
+    }
+    
+    // Call Chrome Built-in AI
+    const model = await LanguageModel.create({
+      language: 'en'
+    });
+    
+    console.log('Calling model.prompt with prompt length:', prompt.length);
+    const result = await model.prompt(prompt);
+    console.log('Model result type:', typeof result, 'result:', result);
+    
+    // Handle different possible response formats
+    let output = '';
+    if (typeof result === 'string') {
+      output = result;
+    } else if (result && result.text) {
+      output = result.text;
+    } else if (result && result.response) {
+      output = result.response;
+    } else if (result && typeof result === 'object') {
+      // Try to stringify the object
+      console.log('Unexpected result format:', result);
+      output = JSON.stringify(result, null, 2);
+    } else {
+      output = String(result);
+    }
+    
+    console.log('Final output length:', output.length);
+    
+    return {
+      success: true,
+      output: output
+    };
+    
+  } catch (error) {
+    console.error('Error processing document generation:', error);
+    return {
+      success: false,
+      output: `❌ Error: ${error.message}`
+    };
   }
 }
 

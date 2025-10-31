@@ -633,6 +633,225 @@ html.light #documentsIcon svg {
   color: var(--neon-green);
 }
 
+/* ===== DOCUMENT GENERATOR ===== */
+.doc-generator-section {
+  margin: 0 var(--spacing-md) var(--spacing-md) var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+.doc-gen-controls {
+  margin-top: var(--spacing-md);
+}
+
+/* Action type selector tabs */
+.ai-action-selector {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--spacing-xs);
+}
+
+.action-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--spacing-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.action-tab:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.action-tab.active {
+  color: var(--neon-cyan);
+  border-bottom-color: var(--neon-cyan);
+  background: rgba(0, 240, 255, 0.05);
+}
+
+.action-icon {
+  font-size: 16px;
+}
+
+/* Mode content */
+.mode-content {
+  display: none;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.mode-content.active {
+  display: flex;
+}
+
+/* Form elements */
+.doc-type-selector,
+.doc-context-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-xs);
+  display: block;
+}
+
+.form-select,
+.form-input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.1);
+}
+
+.form-select option {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: var(--spacing-sm);
+}
+
+.form-textarea {
+  width: 100%;
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+  min-height: 60px;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.1);
+}
+
+.full-width {
+  width: 100%;
+  margin-top: var(--spacing-sm);
+}
+
+/* Document output */
+.doc-output-container {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.doc-output-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.doc-output-header span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.doc-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.btn-small {
+  padding: 6px 8px;
+  font-size: 11px;
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-small svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-small:hover {
+  background: rgba(0, 240, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.btn-small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.doc-output {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Light mode adjustments */
+html.light .doc-output-container {
+  background: var(--bg-tertiary);
+}
+
+html.light .form-select,
+html.light .form-input,
+html.light .form-textarea {
+  background: var(--bg-secondary);
+}
+
+html.light .form-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 /* ===== PLACEHOLDER TEXT ===== */
 .placeholder-text {
   font-size: 12px;
