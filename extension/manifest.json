@@ -7,9 +7,13 @@
     "storage",
     "tabs",
     "notifications",
+    "bookmarks",
     "activeTab",
     "contextMenus",
     "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
   ],
   "background": {
     "service_worker": "scripts/background.js"

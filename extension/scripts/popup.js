@@ -31,7 +31,7 @@ function initIcons() {
 
   // Chat quick action icons - Analyze Page & Legal Summarizer
   document.getElementById('analyzePageIcon').appendChild(createIcon('search', 18));
-  document.getElementById('legalDocumenterIcon').appendChild(createIcon('scale', 18));
+  document.getElementById('legalSummarizerIcon').appendChild(createIcon('scale', 18));
 
   // Document summary icons
   document.getElementById('summaryIcon').appendChild(createIcon('fileText', 16));
@@ -54,29 +54,23 @@ function initIcons() {
 
   // Config modal icons
   initConfigIcons();
-
-  // Team modal icons
-  initTeamIcons();
 }
 
 // Initialize upload modal icons
 function initUploadIcons() {
-  const fileProofreadIcon = document.getElementById('fileProofreadIcon');
-  const fileRewriteIcon = document.getElementById('fileRewriteIcon');
+  const fileUploadIcon = document.getElementById('fileUploadIcon');
   const imageUploadIcon = document.getElementById('imageUploadIcon');
 
-  if (!fileProofreadIcon || !fileRewriteIcon || !imageUploadIcon) {
+  if (!fileUploadIcon || !imageUploadIcon) {
     console.error('Upload icon elements not found');
     return;
   }
 
   // Clear and add icons
-  fileProofreadIcon.innerHTML = '';
-  fileRewriteIcon.innerHTML = '';
+  fileUploadIcon.innerHTML = '';
   imageUploadIcon.innerHTML = '';
 
-  fileProofreadIcon.appendChild(createIcon('file', 20));
-  fileRewriteIcon.appendChild(createIcon('file', 20));
+  fileUploadIcon.appendChild(createIcon('file', 20));
   imageUploadIcon.appendChild(createIcon('image', 20));
 }
 
@@ -91,15 +85,6 @@ function initConfigIcons() {
 
   if (apiKeyToggleIcon) {
     apiKeyToggleIcon.appendChild(createIcon('eye', 16));
-  }
-}
-
-// Initialize team modal icons
-function initTeamIcons() {
-  const teamCloseIcon = document.getElementById('teamCloseIcon');
-
-  if (teamCloseIcon) {
-    teamCloseIcon.appendChild(createIcon('x', 16));
   }
 }
 
@@ -295,21 +280,12 @@ function setupEventListeners() {
 
   // Upload modal
   document.getElementById('uploadCloseBtn').addEventListener('click', closeUploadModal);
-  document.getElementById('fileProofreadInput').addEventListener('change', handleFileProofreadUpload);
-  document.getElementById('fileRewriteInput').addEventListener('change', handleFileRewriteUpload);
+  document.getElementById('fileInput').addEventListener('change', handleFileUpload);
   document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
   // Chat quick action buttons - Analyze Page & Legal Summarizer
   document.getElementById('analyzePageBtn').addEventListener('click', analyzePage);
-
-  const legalDocumenterBtn = document.getElementById('legalDocumenterBtn');
-  legalDocumenterBtn.addEventListener('click', legalDocumenter);
-  legalDocumenterBtn.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      legalDocumenter();
-    }
-  });
+  // document.getElementById('legalSummarizerBtn').addEventListener('click', legalSummarizer);
 
   // Document summary close button
   const summaryCloseBtn = document.getElementById('summaryCloseBtn');
@@ -328,16 +304,6 @@ function setupEventListeners() {
   document.getElementById('configCloseBtn').addEventListener('click', closeConfigModal);
   document.getElementById('configCancelBtn').addEventListener('click', closeConfigModal);
   document.getElementById('configSaveBtn').addEventListener('click', saveConfiguration);
-
-<<<<<<< HEAD
-  // Team modal
-  // Team modal
-  document.getElementById('teamBtn').addEventListener('click', openTeamModal);
-  document.getElementById('teamCloseBtn').addEventListener('click', closeTeamModal);
-
-  // Help and GitHub buttons
-  document.getElementById('helpBtn').addEventListener('click', openHelp);
-  document.getElementById('githubBtn').addEventListener('click', openGithub);
 
   // API key toggle
   document.getElementById('apiKeyToggle').addEventListener('click', toggleApiKeyVisibility);
@@ -359,7 +325,6 @@ function setupEventListeners() {
     if (e.key === 'Escape') {
       closeUploadModal();
       closeConfigModal();
-      closeTeamModal();
     }
   });
 
@@ -369,19 +334,11 @@ function setupEventListeners() {
       closeConfigModal();
     }
   });
-  
-  // Close team modal when clicking outside
-  document.getElementById('teamModal').addEventListener('click', (e) => {
-    if (e.target.id === 'teamModal') {
-      closeTeamModal();
-    }
-  });
 }
 
 // Debounce helper
 let sendMessageTimeout = null;
 let isProcessing = false;
-let legalDocumenterActive = false;
 
 // Auto-expand textarea
 function autoExpandTextarea(event) {
@@ -459,92 +416,8 @@ async function sendMessage(message) {
 
   // Save to chat history
   saveChatMessage(message, 'user');
-  
-  // If Legal Documenter is active, use user's message as Writer input and save file
-  if (legalDocumenterActive) {
-    try {
-      // Request save location immediately to preserve user gesture
-      if (!('showSaveFilePicker' in window)) {
-        addMessageToChat('File System Access API is not supported in this context.', 'bot');
-        // turn off mode and UI, then exit
-        legalDocumenterActive = false;
-        const legalBtnEarly = document.getElementById('legalDocumenterBtn');
-        if (legalBtnEarly) legalBtnEarly.classList.remove('active');
-        isProcessing = false;
-        return;
-      }
 
-      const nowIso = new Date().toISOString();
-      const datePart = nowIso.split('T')[0].replace(/-/g, '');
-      const timePart = nowIso.split('T')[1].split('.')[0];
-      const handle = await window.showSaveFilePicker({
-        suggestedName: `legal-document-${datePart}-${timePart}.txt`,
-        types: [
-          { description: 'Text Files', accept: { 'text/plain': ['.txt'] } },
-        ],
-      });
-
-      // Safe to await other async work after picker
-      const myconfiglanguage = await chrome.storage.local.get('language');
-
-      const writerOptions = {
-        sharedContext: 'Agentic Advocate legal document generator.',
-        tone: 'formal',
-        format: 'plain-text',
-        length: 'long',
-        outputLanguage: myconfiglanguage.language,
-      };
-
-      const writerAvailability = await Writer.availability();
-      let writer;
-      if (writerAvailability === 'unavailable') {
-        addMessageToChat('Writer API is not available.', 'bot');
-      } else if (writerAvailability === 'available') {
-        writer = await Writer.create(writerOptions);
-      } else {
-        writer = await Writer.create({
-          ...writerOptions,
-          monitor(m) {
-            m.addEventListener('downloadprogress', (e) => {
-              console.log(`Downloaded ${e.loaded * 100}%`);
-            });
-          }
-        });
-      }
-
-      if (writer) {
-        addMessageToChat('Generating legal document. Please wait...', 'bot');
-        const legalDocumenterContent = await writer.write(
-          message,
-          {
-            context: 'Act as a legal documenter. Generate a clear, formal legal document based on the user\'s prompt.'
-          }
-        );
-
-        const writable = await handle.createWritable();
-        await writable.write(legalDocumenterContent);
-        await writable.close();
-
-        addMessageToChat('Saved legal document to your chosen location.', 'bot');
-      }
-    } catch (err) {
-      if (err && err.name === 'AbortError') {
-        addMessageToChat('Save canceled.', 'bot');
-      } else {
-        console.error('Legal Documenter error:', err);
-        addMessageToChat('Failed to generate or save the legal document.', 'bot');
-      }
-    } finally {
-      // turn off mode and update UI
-      legalDocumenterActive = false;
-      const legalBtn = document.getElementById('legalDocumenterBtn');
-      if (legalBtn) legalBtn.classList.remove('active');
-      isProcessing = false;
-    }
-    return;
-  }
-
-  // Process with AI (normal chat flow)
+  // Process with AI
   const { defaultTemperature, maxTemperature, defaultTopK, maxTopK } = await LanguageModel.params();
 
   const available = await LanguageModel.availability();
@@ -733,19 +606,6 @@ async function analyzePage() {
   });
 }
 
-// Quick action: Legal Documenter (toggle mode to use next chat input)
-async function legalDocumenter() {
-  const btn = document.getElementById('legalDocumenterBtn');
-  legalDocumenterActive = !legalDocumenterActive;
-  if (btn) btn.classList.toggle('active', legalDocumenterActive);
-
-  if (legalDocumenterActive) {
-    addMessageToChat('Legal Documenter enabled. Send your prompt in chat and I will generate a document and prompt you to save it.', 'bot');
-  } else {
-    addMessageToChat('Legal Documenter disabled.', 'bot');
-  }
-}
-
 
 // Open team page
 function openTeam() {
@@ -754,22 +614,12 @@ function openTeam() {
 
 // Open help
 function openHelp() {
-  chrome.tabs.create({ url: 'https://agentic-advocate.vercel.app/' });
+  chrome.runtime.openOptionsPage();
 }
 
 // Open Github repo
 function openGithub() {
-  chrome.tabs.create({ url: 'https://github.com/Qoyyuum/agentic-advocate/releases/tag/v1.0.0-alpha' });
-}
-
-// Open team modal
-function openTeamModal() {
-  document.getElementById('teamModal').classList.add('show');
-}
-
-// Close team modal
-function closeTeamModal() {
-  document.getElementById('teamModal').classList.remove('show');
+  chrome.tabs.create({ url: 'https://github.com/Qoyyuum/agentic-advocate' });
 }
 
 // ============================================
@@ -866,8 +716,8 @@ function closeUploadModal() {
   modal.classList.remove('show');
 }
 
-// Handle file proofread upload
-async function handleFileProofreadUpload(event) {
+// Handle file upload
+function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
@@ -876,180 +726,37 @@ async function handleFileProofreadUpload(event) {
   // Show upload in chat
   addMessageToChat(`📄 Uploaded: ${file.name}`, 'user');
 
-  try {
-    // Read file content
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const content = e.target.result;
+  // Read file content
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target.result;
 
-        const available = await Proofreader.availability();
-        if (available || available === 'available') {
-          const proofreader = await Proofreader.create({
-            monitor(m) {
-              m.addEventListener('downloadprogress', (ev) => {
-                console.log(`Downloaded ${ev.loaded * 100}%`);
-              });
-            },
-          });
-
-          addMessageToChat('Proofreading document. Please wait...', 'bot');
-          const result = await proofreader.proofread(content);
-
-          addMessageToChat('Corrected text:\n' + (result.correctedInput || result), 'bot');
-          // Render Save button in chat to use a fresh user gesture
-          const chatContainer = document.getElementById('chatContainer');
-          const actionDiv = document.createElement('div');
-          actionDiv.className = 'chat-action';
-          const saveBtn = document.createElement('button');
-          saveBtn.className = 'modal-btn';
-          saveBtn.textContent = 'Save proofread file...';
-          saveBtn.addEventListener('click', async () => {
-            try {
-              if (!('showSaveFilePicker' in window)) {
-                addMessageToChat('File System Access API is not supported in this context.', 'bot');
-                return;
-              }
-              const suggestedBase = file.name.replace(/\.[^\.]+$/, '');
-              const handle = await window.showSaveFilePicker({
-                suggestedName: `${suggestedBase}-proofread.txt`,
-                types: [ { description: 'Text Files', accept: { 'text/plain': ['.txt'] } } ],
-              });
-              const writable = await handle.createWritable();
-              await writable.write(result.correctedInput || result);
-              await writable.close();
-              addMessageToChat('Saved proofread document to your chosen location.', 'bot');
-              saveBtn.disabled = true;
-              saveBtn.textContent = 'Saved';
-            } catch (err) {
-              if (err && err.name === 'AbortError') {
-                addMessageToChat('Save canceled.', 'bot');
-              } else {
-                console.error('Proofread save error:', err);
-                addMessageToChat('Failed to save the proofread file.', 'bot');
-              }
-            }
-          });
-          actionDiv.appendChild(saveBtn);
-          chatContainer.appendChild(actionDiv);
-
-        } else {
-          addMessageToChat('Proofreader is not available. Please try again.', 'bot');
-        }
-      } catch (err) {
-        console.error('Proofread processing error:', err);
-        addMessageToChat('Failed to proofread the file.', 'bot');
+    // Send to AI for processing
+    chrome.runtime.sendMessage({
+      action: 'processWithAI',
+      data: {
+        text: `Analyze this document:\n\nFilename: ${file.name}\nContent: ${content.substring(0, 5000)}...`,
+        taskType: 'document_analysis'
       }
-    };
+    }, (response) => {
+      if (response && response.success) {
+        addMessageToChat(response.result, 'bot');
+        // Show document summary
+        showSummary(response.result);
+      } else {
+        addMessageToChat('Error processing document. Please try again.', 'bot');
+      }
+    });
+  };
 
-    reader.onerror = () => {
-      addMessageToChat('Error reading file. Please try again.', 'bot');
-    };
+  reader.onerror = () => {
+    addMessageToChat('Error reading file. Please try again.', 'bot');
+  };
 
-    reader.readAsText(file);
-  } finally {
-    event.target.value = '';
-  }
+  reader.readAsText(file);
+  event.target.value = ''; // Reset input
 }
 
-// Handle file rewrite upload
-async function handleFileRewriteUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  closeUploadModal();
-
-  // Show upload in chat
-  addMessageToChat(`📄 Uploaded: ${file.name}`, 'user');
-
-  try {
-    // Read file content
-    const reader = new FileReader();
-    const myconfiglanguage = await chrome.storage.local.get('language');
-    const outputLang = (myconfiglanguage && typeof myconfiglanguage.language === 'string') ? myconfiglanguage.language : 'en';
-    reader.onload = async (e) => {
-      try {
-        const content = e.target.result;
-        const options = {
-          sharedContext: 'These are user requests to make the document more professional and formal and for legal use. Handle with utmost confidentiality and care.',
-          tone: 'more-formal',
-          format: 'as-is',
-          length: 'as-is',
-          outputLanguage: outputLang,
-        };
-
-        const available = await Rewriter.availability();
-        let rewriter;
-        if (available === 'unavailable') {
-          addMessageToChat('Rewrite is not available. Please try again.', 'bot');
-          return;
-        }
-        if (available === 'available') {
-          rewriter = await Rewriter.create(options);
-        } else {
-          rewriter = await Rewriter.create(options);
-          rewriter.addEventListener('downloadprogress', (ev) => {
-            console.log(ev.loaded, ev.total);
-          });
-        }
-
-        addMessageToChat('Rewriting document. Please wait...', 'bot');
-        const result = await rewriter.rewrite(content, {
-          context: 'Always maintain a positive image of yourself and the other party (if any). Avoid any toxic language and be as professional as possible.'
-        });
-
-        addMessageToChat('Rewritten text:\n' + result, 'bot');
-        // Render Save button in chat to use a fresh user gesture
-        const chatContainer = document.getElementById('chatContainer');
-        const actionDiv = document.createElement('div');
-        actionDiv.className = 'chat-action';
-        const saveBtn = document.createElement('button');
-        saveBtn.className = 'modal-btn';
-        saveBtn.textContent = 'Save rewritten file...';
-        saveBtn.addEventListener('click', async () => {
-          try {
-            if (!('showSaveFilePicker' in window)) {
-              addMessageToChat('File System Access API is not supported in this context.', 'bot');
-              return;
-            }
-            const suggestedBase = file.name.replace(/\.[^\.]+$/, '');
-            const handle = await window.showSaveFilePicker({
-              suggestedName: `${suggestedBase}-rewritten.txt`,
-              types: [ { description: 'Text Files', accept: { 'text/plain': ['.txt'] } } ],
-            });
-            const writable = await handle.createWritable();
-            await writable.write(result);
-            await writable.close();
-            addMessageToChat('Saved rewritten document to your chosen location.', 'bot');
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'Saved';
-          } catch (err) {
-            if (err && err.name === 'AbortError') {
-              addMessageToChat('Save canceled.', 'bot');
-            } else {
-              console.error('Rewrite save error:', err);
-              addMessageToChat('Failed to save the rewritten file.', 'bot');
-            }
-          }
-        });
-        actionDiv.appendChild(saveBtn);
-        chatContainer.appendChild(actionDiv);
-
-      } catch (err) {
-        console.error('Rewrite processing error:', err);
-        addMessageToChat('Failed to rewrite the file.', 'bot');
-      }
-    };
-
-    reader.onerror = () => {
-      addMessageToChat('Error reading file. Please try again.', 'bot');
-    };
-
-    reader.readAsText(file);
-  } finally {
-    event.target.value = '';
-  }
-}
 // Handle image upload
 function handleImageUpload(event) {
   const file = event.target.files[0];
