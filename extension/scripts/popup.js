@@ -55,19 +55,22 @@ function initIcons() {
 
 // Initialize upload modal icons
 function initUploadIcons() {
-  const fileUploadIcon = document.getElementById('fileUploadIcon');
+  const fileProofreadIcon = document.getElementById('fileProofreadIcon');
+  const fileRewriteIcon = document.getElementById('fileRewriteIcon');
   const imageUploadIcon = document.getElementById('imageUploadIcon');
 
-  if (!fileUploadIcon || !imageUploadIcon) {
+  if (!fileProofreadIcon || !fileRewriteIcon || !imageUploadIcon) {
     console.error('Upload icon elements not found');
     return;
   }
 
   // Clear and add icons
-  fileUploadIcon.innerHTML = '';
+  fileProofreadIcon.innerHTML = '';
+  fileRewriteIcon.innerHTML = '';
   imageUploadIcon.innerHTML = '';
 
-  fileUploadIcon.appendChild(createIcon('file', 20));
+  fileProofreadIcon.appendChild(createIcon('file', 20));
+  fileRewriteIcon.appendChild(createIcon('file', 20));
   imageUploadIcon.appendChild(createIcon('image', 20));
 }
 
@@ -277,7 +280,8 @@ function setupEventListeners() {
 
   // Upload modal
   document.getElementById('uploadCloseBtn').addEventListener('click', closeUploadModal);
-  document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+  document.getElementById('fileProofreadInput').addEventListener('change', handleFileProofreadUpload);
+  document.getElementById('fileRewriteInput').addEventListener('change', handleFileRewriteUpload);
   document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
   // Chat quick action buttons - Analyze Page & Legal Summarizer
@@ -810,8 +814,8 @@ function closeUploadModal() {
   modal.classList.remove('show');
 }
 
-// Handle file upload
-function handleFileUpload(event) {
+// Handle file proofread upload
+async function handleFileProofreadUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
@@ -820,37 +824,180 @@ function handleFileUpload(event) {
   // Show upload in chat
   addMessageToChat(`📄 Uploaded: ${file.name}`, 'user');
 
-  // Read file content
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const content = e.target.result;
+  try {
+    // Read file content
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const content = e.target.result;
 
-    // Send to AI for processing
-    chrome.runtime.sendMessage({
-      action: 'processWithAI',
-      data: {
-        text: `Analyze this document:\n\nFilename: ${file.name}\nContent: ${content.substring(0, 5000)}...`,
-        taskType: 'document_analysis'
+        const available = await Proofreader.availability();
+        if (available || available === 'available') {
+          const proofreader = await Proofreader.create({
+            monitor(m) {
+              m.addEventListener('downloadprogress', (ev) => {
+                console.log(`Downloaded ${ev.loaded * 100}%`);
+              });
+            },
+          });
+
+          addMessageToChat('Proofreading document. Please wait...', 'bot');
+          const result = await proofreader.proofread(content);
+
+          addMessageToChat('Corrected text:\n' + (result.correctedInput || result), 'bot');
+          // Render Save button in chat to use a fresh user gesture
+          const chatContainer = document.getElementById('chatContainer');
+          const actionDiv = document.createElement('div');
+          actionDiv.className = 'chat-action';
+          const saveBtn = document.createElement('button');
+          saveBtn.className = 'modal-btn';
+          saveBtn.textContent = 'Save proofread file...';
+          saveBtn.addEventListener('click', async () => {
+            try {
+              if (!('showSaveFilePicker' in window)) {
+                addMessageToChat('File System Access API is not supported in this context.', 'bot');
+                return;
+              }
+              const suggestedBase = file.name.replace(/\.[^\.]+$/, '');
+              const handle = await window.showSaveFilePicker({
+                suggestedName: `${suggestedBase}-proofread.txt`,
+                types: [ { description: 'Text Files', accept: { 'text/plain': ['.txt'] } } ],
+              });
+              const writable = await handle.createWritable();
+              await writable.write(result.correctedInput || result);
+              await writable.close();
+              addMessageToChat('Saved proofread document to your chosen location.', 'bot');
+              saveBtn.disabled = true;
+              saveBtn.textContent = 'Saved';
+            } catch (err) {
+              if (err && err.name === 'AbortError') {
+                addMessageToChat('Save canceled.', 'bot');
+              } else {
+                console.error('Proofread save error:', err);
+                addMessageToChat('Failed to save the proofread file.', 'bot');
+              }
+            }
+          });
+          actionDiv.appendChild(saveBtn);
+          chatContainer.appendChild(actionDiv);
+
+        } else {
+          addMessageToChat('Proofreader is not available. Please try again.', 'bot');
+        }
+      } catch (err) {
+        console.error('Proofread processing error:', err);
+        addMessageToChat('Failed to proofread the file.', 'bot');
       }
-    }, (response) => {
-      if (response && response.success) {
-        addMessageToChat(response.result, 'bot');
-        // Show document summary
-        showSummary(response.result);
-      } else {
-        addMessageToChat('Error processing document. Please try again.', 'bot');
-      }
-    });
-  };
+    };
 
-  reader.onerror = () => {
-    addMessageToChat('Error reading file. Please try again.', 'bot');
-  };
+    reader.onerror = () => {
+      addMessageToChat('Error reading file. Please try again.', 'bot');
+    };
 
-  reader.readAsText(file);
-  event.target.value = ''; // Reset input
+    reader.readAsText(file);
+  } finally {
+    event.target.value = '';
+  }
 }
 
+// Handle file rewrite upload
+async function handleFileRewriteUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  closeUploadModal();
+
+  // Show upload in chat
+  addMessageToChat(`📄 Uploaded: ${file.name}`, 'user');
+
+  try {
+    // Read file content
+    const reader = new FileReader();
+    const myconfiglanguage = await chrome.storage.local.get('language');
+    const outputLang = (myconfiglanguage && typeof myconfiglanguage.language === 'string') ? myconfiglanguage.language : 'en';
+    reader.onload = async (e) => {
+      try {
+        const content = e.target.result;
+        const options = {
+          sharedContext: 'These are user requests to make the document more professional and formal and for legal use. Handle with utmost confidentiality and care.',
+          tone: 'more-formal',
+          format: 'as-is',
+          length: 'as-is',
+          outputLanguage: outputLang,
+        };
+
+        const available = await Rewriter.availability();
+        let rewriter;
+        if (available === 'unavailable') {
+          addMessageToChat('Rewrite is not available. Please try again.', 'bot');
+          return;
+        }
+        if (available === 'available') {
+          rewriter = await Rewriter.create(options);
+        } else {
+          rewriter = await Rewriter.create(options);
+          rewriter.addEventListener('downloadprogress', (ev) => {
+            console.log(ev.loaded, ev.total);
+          });
+        }
+
+        addMessageToChat('Rewriting document. Please wait...', 'bot');
+        const result = await rewriter.rewrite(content, {
+          context: 'Always maintain a positive image of yourself and the other party (if any). Avoid any toxic language and be as professional as possible.'
+        });
+
+        addMessageToChat('Rewritten text:\n' + result, 'bot');
+        // Render Save button in chat to use a fresh user gesture
+        const chatContainer = document.getElementById('chatContainer');
+        const actionDiv = document.createElement('div');
+        actionDiv.className = 'chat-action';
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'modal-btn';
+        saveBtn.textContent = 'Save rewritten file...';
+        saveBtn.addEventListener('click', async () => {
+          try {
+            if (!('showSaveFilePicker' in window)) {
+              addMessageToChat('File System Access API is not supported in this context.', 'bot');
+              return;
+            }
+            const suggestedBase = file.name.replace(/\.[^\.]+$/, '');
+            const handle = await window.showSaveFilePicker({
+              suggestedName: `${suggestedBase}-rewritten.txt`,
+              types: [ { description: 'Text Files', accept: { 'text/plain': ['.txt'] } } ],
+            });
+            const writable = await handle.createWritable();
+            await writable.write(result);
+            await writable.close();
+            addMessageToChat('Saved rewritten document to your chosen location.', 'bot');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saved';
+          } catch (err) {
+            if (err && err.name === 'AbortError') {
+              addMessageToChat('Save canceled.', 'bot');
+            } else {
+              console.error('Rewrite save error:', err);
+              addMessageToChat('Failed to save the rewritten file.', 'bot');
+            }
+          }
+        });
+        actionDiv.appendChild(saveBtn);
+        chatContainer.appendChild(actionDiv);
+
+      } catch (err) {
+        console.error('Rewrite processing error:', err);
+        addMessageToChat('Failed to rewrite the file.', 'bot');
+      }
+    };
+
+    reader.onerror = () => {
+      addMessageToChat('Error reading file. Please try again.', 'bot');
+    };
+
+    reader.readAsText(file);
+  } finally {
+    event.target.value = '';
+  }
+}
 // Handle image upload
 function handleImageUpload(event) {
   const file = event.target.files[0];

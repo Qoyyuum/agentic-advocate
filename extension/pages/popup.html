@@ -130,9 +130,13 @@
     <div class="modal-content glass-panel">
       <h3 class="modal-title">Upload Document</h3>
       <div class="upload-options">
-        <label class="upload-option glass-panel-hover" for="fileInput">
-          <div class="upload-icon" id="fileUploadIcon"></div>
-          <span>Choose File</span>
+        <label class="upload-option glass-panel-hover" for="fileProofreadInput">
+          <div class="upload-icon" id="fileProofreadIcon"></div>
+          <span>Upload Text File to Proofread</span>
+        </label>
+        <label class="upload-option glass-panel-hover" for="fileRewriteInput">
+          <div class="upload-icon" id="fileRewriteIcon"></div>
+          <span>Upload Text File to Rewrite</span>
         </label>
         <label class="upload-option glass-panel-hover" for="imageInput">
           <div class="upload-icon" id="imageUploadIcon"></div>
@@ -140,7 +144,8 @@
         </label>
       </div>
       <button class="modal-btn" id="uploadCloseBtn">Cancel</button>
-      <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="display: none;">
+      <input type="file" id="fileProofreadInput" accept=".pdf,.doc,.docx,.txt" style="display: none;">
+      <input type="file" id="fileRewriteInput" accept=".pdf,.doc,.docx,.txt" style="display: none;">
       <input type="file" id="imageInput" accept="image/*" style="display: none;">
     </div>
   </div>
