@@ -1161,3 +1161,32 @@ html.light .footer-icon svg,
 html.light .action-icon svg {
   opacity: 1;
 }
+
+/* ===== TEAM MODAL ===== */
+.team-members {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.team-member:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--neon-cyan);
+  transform: translateX(4px);
+}
+
+.member-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}

@@ -54,6 +54,9 @@ function initIcons() {
 
   // Config modal icons
   initConfigIcons();
+
+  // Team modal icons
+  initTeamIcons();
 }
 
 // Initialize upload modal icons
@@ -85,6 +88,15 @@ function initConfigIcons() {
 
   if (apiKeyToggleIcon) {
     apiKeyToggleIcon.appendChild(createIcon('eye', 16));
+  }
+}
+
+// Initialize team modal icons
+function initTeamIcons() {
+  const teamCloseIcon = document.getElementById('teamCloseIcon');
+
+  if (teamCloseIcon) {
+    teamCloseIcon.appendChild(createIcon('x', 16));
   }
 }
 
@@ -305,6 +317,10 @@ function setupEventListeners() {
   document.getElementById('configCancelBtn').addEventListener('click', closeConfigModal);
   document.getElementById('configSaveBtn').addEventListener('click', saveConfiguration);
 
+  // Team modal
+  document.getElementById('teamBtn').addEventListener('click', openTeamModal);
+  document.getElementById('teamCloseBtn').addEventListener('click', closeTeamModal);
+
   // API key toggle
   document.getElementById('apiKeyToggle').addEventListener('click', toggleApiKeyVisibility);
   
@@ -325,6 +341,7 @@ function setupEventListeners() {
     if (e.key === 'Escape') {
       closeUploadModal();
       closeConfigModal();
+      closeTeamModal();
     }
   });
 
@@ -332,6 +349,13 @@ function setupEventListeners() {
   document.getElementById('configModal').addEventListener('click', (e) => {
     if (e.target.id === 'configModal') {
       closeConfigModal();
+    }
+  });
+  
+  // Close team modal when clicking outside
+  document.getElementById('teamModal').addEventListener('click', (e) => {
+    if (e.target.id === 'teamModal') {
+      closeTeamModal();
     }
   });
 }
@@ -614,12 +638,22 @@ function openTeam() {
 
 // Open help
 function openHelp() {
-  chrome.runtime.openOptionsPage();
+  chrome.tabs.create({ url: 'https://agentic-advocate.vercel.app/' });
 }
 
 // Open Github repo
 function openGithub() {
-  chrome.tabs.create({ url: 'https://github.com/Qoyyuum/agentic-advocate' });
+  chrome.tabs.create({ url: 'https://github.com/Qoyyuum/agentic-advocate/releases/tag/v1.0.0-alpha' });
+}
+
+// Open team modal
+function openTeamModal() {
+  document.getElementById('teamModal').classList.add('show');
+}
+
+// Close team modal
+function closeTeamModal() {
+  document.getElementById('teamModal').classList.remove('show');
 }
 
 // ============================================
