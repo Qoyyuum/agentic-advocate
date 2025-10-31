@@ -456,36 +456,23 @@ async function sendMessage(message) {
   // Save to chat history
   saveChatMessage(message, 'user');
 
-  // Process with AI
-  const { defaultTemperature, maxTemperature, defaultTopK, maxTopK } = await LanguageModel.params();
-
-  const available = await LanguageModel.availability();
-  const myconfiglanguage = await chrome.storage.local.get('language');
-  if (available !== 'unavailable') {
-    const session = await LanguageModel.create({
-       initialPrompts: [
-        { role: 'system', content: 'You are Agentic Advocate, a helpful and friendly legal assistant advising the user on legal jargons and whether the content that they are reading is safe or risky to the user. Keep your responses formal and professional whilst keeping it short and simple for the user to understand like they are non-legal professionals.' },
-    ],
-    expectedInputs: [
-      { type: 'text' },
-      { type: 'image' },
-      { type: 'audio' },
-    ],
-    expectedOutputs: [
-      { type: 'text', language: [myconfiglanguage.language] },
-    ],
-    });
+  // Process with AI through background script
+  chrome.runtime.sendMessage({
+    action: 'processWithAI',
+    data: {
+      text: message,
+      taskType: 'chat'
+    }
+  }, (response) => {
+    isProcessing = false;
     
-    const sourcelanguage = await detectLanguage(message);
-    const translatedmessage = await translateLanguage(sourcelanguage, message);
-
-
-    // Prompt the model 
-    const stream = await session.prompt([{ role: 'user', content: translatedmessage }]);
-    addMessageToChat(stream, 'bot');
-  }
-  // Reset processing flag
-  isProcessing = false;
+    if (response && response.success) {
+      addMessageToChat(response.result, 'bot');
+    } else {
+      addMessageToChat('Sorry, I encountered an error. Please try again.', 'bot');
+      console.error('AI processing error:', response?.error);
+    }
+  });
 }
 
 // Add message to chat container
@@ -811,14 +798,22 @@ function handleImageUpload(event) {
   reader.onload = (e) => {
     const imageData = e.target.result;
 
-    // For now, just confirm upload (actual OCR/vision would require external API)
-    addMessageToChat('Image uploaded successfully. Image analysis feature coming soon!', 'bot');
-
-    // TODO: Integrate with image analysis API
-    // chrome.runtime.sendMessage({
-    //   action: 'analyzeImage',
-    //   data: { image: imageData, filename: file.name }
-    // }, callback);
+    // Send to AI for analysis through background script
+    chrome.runtime.sendMessage({
+      action: 'processWithAI',
+      data: {
+        text: `Analyze this image: ${file.name}`,
+        taskType: 'image_analysis',
+        image: imageData
+      }
+    }, (response) => {
+      if (response && response.success) {
+        addMessageToChat(response.result, 'bot');
+      } else {
+        addMessageToChat('Error analyzing image. Please try again.', 'bot');
+        console.error('Image analysis error:', response?.error);
+      }
+    });
   };
 
   reader.onerror = () => {

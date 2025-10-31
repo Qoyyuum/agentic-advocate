@@ -129,18 +129,94 @@ async function checkAICapabilities() {
 // Process text with Gemini Nano
 async function processWithGeminiNano(data) {
   try {
-    const { text, taskType } = data;
+    const { text, taskType, image } = data;
 
-    // For now, return a placeholder response
-    // TODO: Implement actual Gemini Nano API calls when available
+    // Check if Chrome Built-in AI is available
+    let LanguageModel;
+    if (typeof self !== 'undefined' && self.LanguageModel) {
+      LanguageModel = self.LanguageModel;
+    } else if (typeof self !== 'undefined' && self.ai && self.ai.languageModel) {
+      LanguageModel = self.ai.languageModel;
+    }
+    
+    if (!LanguageModel || typeof LanguageModel.create === 'undefined') {
+      console.error('LanguageModel not available');
+      return {
+        success: false,
+        error: 'Chrome Built-in AI not available'
+      };
+    }
+
+    // Create appropriate prompt based on task type
+    let prompt = '';
+    if (taskType === 'chat') {
+      prompt = `As Agentic Advocate, a helpful and friendly legal assistant, respond to this question about legal matters, compliance, or tax issues. Keep your response formal and professional, but also keep it short and simple for non-legal professionals to understand:
+
+${text}`;
+    } else if (taskType === 'document_analysis') {
+      prompt = `Analyze the following document and provide a comprehensive summary covering:
+1. Main topics and key points
+2. Important dates, names, or legal terms
+3. Any legal risks or concerns
+4. Recommendations or next steps
+
+Document content:
+${text}`;
+    } else if (taskType === 'image_analysis') {
+      prompt = `Analyze this image and provide a legal perspective on what you see. As a legal assistant, identify:
+1. Any legal documents visible (contracts, IDs, letters, forms, etc.)
+2. Potential legal risks or concerns
+3. Important information that should be verified
+4. Recommendations for next steps
+
+Please provide a comprehensive analysis.`;
+    } else {
+      prompt = text;
+    }
+
+    // Call Chrome Built-in AI with image support if provided
+    const model = await LanguageModel.create({
+      language: 'en'
+    });
+    
+    console.log('Calling model.prompt for', taskType, 'with prompt length:', prompt.length, 'hasImage:', !!image);
+    
+    // If image is provided, pass it to the prompt
+    let result;
+    if (image) {
+      result = await model.prompt(prompt, image);
+    } else {
+      result = await model.prompt(prompt);
+    }
+    
+    console.log('Model result type:', typeof result);
+    
+    // Handle different possible response formats
+    let output = '';
+    if (typeof result === 'string') {
+      output = result;
+    } else if (result && result.text) {
+      output = result.text;
+    } else if (result && result.response) {
+      output = result.response;
+    } else {
+      console.log('Unexpected result format:', result);
+      output = JSON.stringify(result, null, 2);
+    }
+    
+    console.log('Final output length:', output.length);
+    
     return {
       success: true,
-      result: `Processed: ${text.substring(0, 50)}...`,
+      result: output,
       taskType: taskType
     };
   } catch (error) {
     console.error('Error processing with AI:', error);
-    return { success: false, error: error.message };
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 }
 
