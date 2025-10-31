@@ -321,6 +321,10 @@ function setupEventListeners() {
   document.getElementById('teamBtn').addEventListener('click', openTeamModal);
   document.getElementById('teamCloseBtn').addEventListener('click', closeTeamModal);
 
+  // Help and GitHub buttons
+  document.getElementById('helpBtn').addEventListener('click', openHelp);
+  document.getElementById('githubBtn').addEventListener('click', openGithub);
+
   // API key toggle
   document.getElementById('apiKeyToggle').addEventListener('click', toggleApiKeyVisibility);
   
@@ -654,6 +658,16 @@ function openTeamModal() {
 // Close team modal
 function closeTeamModal() {
   document.getElementById('teamModal').classList.remove('show');
+}
+
+// Open help
+function openHelp() {
+  chrome.tabs.create({ url: 'https://agentic-advocate.vercel.app/' });
+}
+
+// Open Github repo
+function openGithub() {
+  chrome.tabs.create({ url: 'https://github.com/Qoyyuum/agentic-advocate/releases/tag/v1.0.0-alpha' });
 }
 
 // ============================================
