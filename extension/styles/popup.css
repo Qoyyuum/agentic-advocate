@@ -395,6 +395,104 @@ html.light .message-icon svg {
   background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(157, 78, 221, 0.15));
 }
 
+/* Loading Indicator */
+.chat-loading {
+  display: flex;
+  gap: var(--spacing-xs);
+  animation: slideIn 0.3s ease-out;
+}
+
+.chat-loading .message-icon {
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.loading-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  animation: loading-bounce 1.4s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes loading-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.loading-text {
+  font-style: italic;
+  color: var(--text-secondary);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Inline loading dots for buttons */
+.loading-dots-inline {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  margin-right: 6px;
+}
+
+.loading-dots-inline span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #000;
+  animation: loading-bounce 1.4s infinite ease-in-out;
+}
+
+.loading-dots-inline span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots-inline span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.loading-dots-inline span:nth-child(3) {
+  animation-delay: 0s;
+}
+
+.btn-loading {
+  display: inline-flex;
+  align-items: center;
+}
+
 /* Chat Input */
 .chat-input-wrapper {
   display: flex;
@@ -432,6 +530,21 @@ html.light .message-icon svg {
 
 .action-btn:active {
   transform: translateY(0);
+}
+
+.action-btn.active {
+  background: rgba(255, 0, 0, 0.2);
+  border-color: #ff0000;
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+  }
 }
 
 .action-icon {
@@ -1143,11 +1256,16 @@ html.light .form-select:focus {
 
 /* ===== NEON BUTTON ===== */
 .neon-btn {
+  padding: 12px var(--spacing-md);
+  border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
   border: none;
   color: #000;
+  font-size: 14px;
   font-weight: 600;
+  cursor: pointer;
   transition: all 0.2s ease;
+  font-family: inherit;
 }
 
 .neon-btn:hover {

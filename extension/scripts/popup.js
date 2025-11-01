@@ -456,6 +456,9 @@ async function sendMessage(message) {
   // Save to chat history
   saveChatMessage(message, 'user');
 
+  // Show loading indicator
+  showLoading();
+
   // Process with AI through background script
   chrome.runtime.sendMessage({
     action: 'processWithAI',
@@ -466,6 +469,9 @@ async function sendMessage(message) {
   }, (response) => {
     isProcessing = false;
     
+    // Hide loading indicator
+    hideLoading();
+    
     if (response && response.success) {
       addMessageToChat(response.result, 'bot');
     } else {
@@ -475,9 +481,82 @@ async function sendMessage(message) {
   });
 }
 
+// Show loading indicator
+function showLoading() {
+  const loadingIndicator = document.getElementById('chatLoading');
+  if (loadingIndicator) {
+    loadingIndicator.style.display = 'flex';
+    // Scroll to bottom to show loading indicator
+    const chatContainer = document.getElementById('chatContainer');
+    if (chatContainer) {
+      chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }
+}
+
+// Hide loading indicator
+function hideLoading() {
+  const loadingIndicator = document.getElementById('chatLoading');
+  if (loadingIndicator) {
+    loadingIndicator.style.display = 'none';
+  }
+}
+
+// Clean and format output text
+function cleanOutputText(text) {
+  if (!text || typeof text !== 'string') {
+    return text || '';
+  }
+
+  let cleaned = text;
+
+  // Remove markdown code blocks but keep content
+  cleaned = cleaned.replace(/```[\s\S]*?```/g, (match) => {
+    return match.replace(/```[a-z]*\n?/g, '').replace(/```/g, '').trim();
+  });
+
+  // Remove inline code markers
+  cleaned = cleaned.replace(/`([^`]+)`/g, '$1');
+
+  // Remove excessive brackets and quotes at start/end
+  cleaned = cleaned.replace(/^["'`\[\{]+|["'`\]\}]+$/g, '');
+  
+  // Remove redundant quotes wrapping the entire text
+  cleaned = cleaned.replace(/^["'](.+?)["']$/s, '$1');
+
+  // Remove triple quotes
+  cleaned = cleaned.replace(/['"]{3,}/g, '');
+
+  // Clean up multiple consecutive brackets
+  cleaned = cleaned.replace(/[\[\{]{2,}/g, '[');
+  cleaned = cleaned.replace(/[\]\}]{2,}/g, ']');
+
+  // Remove excessive markdown formatting
+  cleaned = cleaned.replace(/\*\*{2,}/g, '**');
+  cleaned = cleaned.replace(/_{2,}/g, '_');
+  cleaned = cleaned.replace(/#{4,}/g, '###');
+
+  // Remove leading/trailing whitespace and normalize line breaks
+  cleaned = cleaned.trim();
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
+  // Remove excessive quotation marks in the middle
+  cleaned = cleaned.replace(/["']+/g, '"');
+
+  return cleaned;
+}
+
 // Add message to chat container
 function addMessageToChat(message, type, shouldSave = true) {
   const chatContainer = document.getElementById('chatContainer');
+  
+  // Clean bot messages before displaying
+  if (type === 'bot') {
+    message = cleanOutputText(message);
+  }
 
   // Limit to 5 messages - remove oldest if exceeding
   const messages = chatContainer.querySelectorAll('.chat-message');
@@ -588,6 +667,16 @@ async function analyzePage() {
       addMessageToChat('No active tab found.', 'bot');
       return;
     }
+    
+    // Check if tab is a chrome:// or system page
+    if (tab.url.startsWith('chrome://') ||
+        tab.url.startsWith('edge://') ||
+        tab.url.startsWith('chrome-extension://') ||
+        tab.url.startsWith('about:')) {
+      addMessageToChat('Cannot analyze system pages or extension pages. Please try on a regular webpage.', 'bot');
+      return;
+    }
+    
     console.log(tab.id);
     chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -622,6 +711,12 @@ async function analyzePage() {
         return clean(bodyTxt).slice(0, 2000);
       }
     }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error executing script:', chrome.runtime.lastError.message);
+        addMessageToChat('Error analyzing page. Please try on a different webpage.', 'bot');
+        return;
+      }
+      
       if (results && results[0] && results[0].result) {
         const content = results[0].result;
         sendMessage(content);
@@ -701,7 +796,17 @@ function startVoiceInput() {
   recognition.onerror = (event) => {
     console.error('Speech recognition error:', event.error);
     stopVoiceInput();
-    addMessageToChat('Voice recognition error. Please try again.', 'bot');
+    
+    let errorMessage = 'Voice recognition error. Please try again.';
+    if (event.error === 'not-allowed') {
+      errorMessage = 'Microphone permission denied. Please enable microphone access in your browser settings.';
+    } else if (event.error === 'no-speech') {
+      errorMessage = 'No speech detected. Please try speaking again.';
+    } else if (event.error === 'network') {
+      errorMessage = 'Network error. Please check your internet connection.';
+    }
+    
+    addMessageToChat(errorMessage, 'bot');
   };
 
   recognition.onend = () => {
@@ -757,6 +862,9 @@ function handleFileUpload(event) {
   reader.onload = (e) => {
     const content = e.target.result;
 
+    // Show loading indicator
+    showLoading();
+
     // Send to AI for processing
     chrome.runtime.sendMessage({
       action: 'processWithAI',
@@ -765,6 +873,9 @@ function handleFileUpload(event) {
         taskType: 'document_analysis'
       }
     }, (response) => {
+      // Hide loading indicator
+      hideLoading();
+      
       if (response && response.success) {
         addMessageToChat(response.result, 'bot');
         // Show document summary
@@ -776,6 +887,7 @@ function handleFileUpload(event) {
   };
 
   reader.onerror = () => {
+    hideLoading();
     addMessageToChat('Error reading file. Please try again.', 'bot');
   };
 
@@ -798,6 +910,9 @@ function handleImageUpload(event) {
   reader.onload = (e) => {
     const imageData = e.target.result;
 
+    // Show loading indicator
+    showLoading();
+
     // Send to AI for analysis through background script
     chrome.runtime.sendMessage({
       action: 'processWithAI',
@@ -807,6 +922,9 @@ function handleImageUpload(event) {
         image: imageData
       }
     }, (response) => {
+      // Hide loading indicator
+      hideLoading();
+      
       if (response && response.success) {
         addMessageToChat(response.result, 'bot');
       } else {
@@ -817,6 +935,7 @@ function handleImageUpload(event) {
   };
 
   reader.onerror = () => {
+    hideLoading();
     addMessageToChat('Error reading image. Please try again.', 'bot');
   };
 
@@ -1007,9 +1126,12 @@ async function generateDocument() {
   }
   
   const button = document.getElementById('generateDocBtn');
-  const originalText = button.innerHTML;
+  const btnText = button.querySelector('.btn-text');
+  const btnLoading = button.querySelector('.btn-loading');
+  
   button.disabled = true;
-  button.innerHTML = '<span>⚡ Generating...</span>';
+  btnText.style.display = 'none';
+  btnLoading.style.display = 'inline-flex';
   
   try {
     chrome.runtime.sendMessage({
@@ -1019,7 +1141,8 @@ async function generateDocument() {
       context
     }, (response) => {
       button.disabled = false;
-      button.innerHTML = originalText;
+      btnText.style.display = 'inline';
+      btnLoading.style.display = 'none';
       
       if (chrome.runtime.lastError) {
         console.error('Error:', chrome.runtime.lastError);
@@ -1038,7 +1161,8 @@ async function generateDocument() {
   } catch (error) {
     console.error('Error generating document:', error);
     button.disabled = false;
-    button.innerHTML = originalText;
+    btnText.style.display = 'inline';
+    btnLoading.style.display = 'none';
     showDocOutput('❌ Error: ' + error.message);
   }
 }
@@ -1054,9 +1178,12 @@ async function rewriteDocument() {
   }
   
   const button = document.getElementById('rewriteBtn');
-  const originalText = button.innerHTML;
+  const btnText = button.querySelector('.btn-text');
+  const btnLoading = button.querySelector('.btn-loading');
+  
   button.disabled = true;
-  button.innerHTML = '<span>⚡ Rewriting...</span>';
+  btnText.style.display = 'none';
+  btnLoading.style.display = 'inline-flex';
   
   try {
     chrome.runtime.sendMessage({
@@ -1066,7 +1193,8 @@ async function rewriteDocument() {
       goal
     }, (response) => {
       button.disabled = false;
-      button.innerHTML = originalText;
+      btnText.style.display = 'inline';
+      btnLoading.style.display = 'none';
       
       if (chrome.runtime.lastError) {
         console.error('Error:', chrome.runtime.lastError);
@@ -1085,7 +1213,8 @@ async function rewriteDocument() {
   } catch (error) {
     console.error('Error rewriting:', error);
     button.disabled = false;
-    button.innerHTML = originalText;
+    btnText.style.display = 'inline';
+    btnLoading.style.display = 'none';
     showDocOutput('❌ Error: ' + error.message);
   }
 }
@@ -1100,9 +1229,12 @@ async function proofreadDocument() {
   }
   
   const button = document.getElementById('proofreadBtn');
-  const originalText = button.innerHTML;
+  const btnText = button.querySelector('.btn-text');
+  const btnLoading = button.querySelector('.btn-loading');
+  
   button.disabled = true;
-  button.innerHTML = '<span>⚡ Proofreading...</span>';
+  btnText.style.display = 'none';
+  btnLoading.style.display = 'inline-flex';
   
   try {
     chrome.runtime.sendMessage({
@@ -1111,7 +1243,8 @@ async function proofreadDocument() {
       text
     }, (response) => {
       button.disabled = false;
-      button.innerHTML = originalText;
+      btnText.style.display = 'inline';
+      btnLoading.style.display = 'none';
       
       if (chrome.runtime.lastError) {
         console.error('Error:', chrome.runtime.lastError);
@@ -1130,14 +1263,17 @@ async function proofreadDocument() {
   } catch (error) {
     console.error('Error proofreading:', error);
     button.disabled = false;
-    button.innerHTML = originalText;
+    btnText.style.display = 'inline';
+    btnLoading.style.display = 'none';
     showDocOutput('❌ Error: ' + error.message);
   }
 }
 
 // Show output in document output container
 function showDocOutput(content) {
-  document.getElementById('docOutput').textContent = content;
+  // Clean the content before displaying
+  const cleanedContent = cleanOutputText(content);
+  document.getElementById('docOutput').textContent = cleanedContent;
   document.getElementById('docOutputContainer').style.display = 'block';
   
   // Scroll to output
