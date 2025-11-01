@@ -62,21 +62,34 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('Background received message:', request.action || request.type);
 
+  // Handle async responses
   switch (request.action || request.type) {
     case 'getAICapabilities':
-      checkAICapabilities().then(sendResponse);
-      return true;
+      checkAICapabilities().then(sendResponse).catch(err => {
+        console.error('Error checking AI capabilities:', err);
+        sendResponse({ error: err.message });
+      });
+      return true; // Keep channel open for async response
 
     case 'processWithAI':
-      processWithGeminiNano(request.data).then(sendResponse);
-      return true;
+      processWithGeminiNano(request.data).then(sendResponse).catch(err => {
+        console.error('Error processing with AI:', err);
+        sendResponse({ success: false, error: err.message });
+      });
+      return true; // Keep channel open for async response
 
     case 'saveDocument':
-      saveToIndexedDB(request.document).then(sendResponse);
+      saveToIndexedDB(request.document).then(sendResponse).catch(err => {
+        console.error('Error saving document:', err);
+        sendResponse({ error: err.message });
+      });
       return true;
 
     case 'getDocuments':
-      getFromIndexedDB().then(sendResponse);
+      getFromIndexedDB().then(sendResponse).catch(err => {
+        console.error('Error getting documents:', err);
+        sendResponse({ error: err.message });
+      });
       return true;
 
     case 'openTab':
@@ -87,13 +100,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true;
 
     case 'AA_DOCUMENT_GENERATE':
-      processDocumentGeneration(request).then(sendResponse);
+      processDocumentGeneration(request).then(sendResponse).catch(err => {
+        console.error('Error processing document:', err);
+        sendResponse({ success: false, output: `Error: ${err.message}` });
+      });
       return true;
 
     default:
       sendResponse({ error: 'Unknown action' });
+      return false; // Synchronous response
   }
-  return true;
 });
 
 // Check Chrome Built-in AI capabilities
