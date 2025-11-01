@@ -60,6 +60,9 @@ function initIcons() {
   
   // Help modal icons
   initHelpIcons();
+  
+  // Microphone permission modal icons
+  initMicPermissionIcons();
 }
 
 // Initialize team modal icons
@@ -77,6 +80,15 @@ function initHelpIcons() {
   
   if (helpCloseIcon) {
     helpCloseIcon.appendChild(createIcon('x', 16));
+  }
+}
+
+// Initialize microphone permission modal icons
+function initMicPermissionIcons() {
+  const micPermissionCloseIcon = document.getElementById('micPermissionCloseIcon');
+  
+  if (micPermissionCloseIcon) {
+    micPermissionCloseIcon.appendChild(createIcon('x', 16));
   }
 }
 
@@ -307,6 +319,11 @@ function setupEventListeners() {
   document.getElementById('fileInput').addEventListener('change', handleFileUpload);
   document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
+  // Microphone permission modal
+  document.getElementById('micPermissionCloseBtn').addEventListener('click', closeMicPermissionModal);
+  document.getElementById('micPermissionCancelBtn').addEventListener('click', closeMicPermissionModal);
+  document.getElementById('micPermissionEnableBtn').addEventListener('click', enableMicrophone);
+
   // Chat quick action buttons - Analyze Page & Legal Summarizer
   document.getElementById('analyzePageBtn').addEventListener('click', analyzePage);
   // document.getElementById('legalSummarizerBtn').addEventListener('click', legalSummarizer);
@@ -364,6 +381,7 @@ function setupEventListeners() {
     if (e.key === 'Escape') {
       closeUploadModal();
       closeConfigModal();
+      closeMicPermissionModal();
     }
   });
 
@@ -371,6 +389,12 @@ function setupEventListeners() {
   document.getElementById('configModal').addEventListener('click', (e) => {
     if (e.target.id === 'configModal') {
       closeConfigModal();
+    }
+  });
+
+  document.getElementById('micPermissionModal').addEventListener('click', (e) => {
+    if (e.target.id === 'micPermissionModal') {
+      closeMicPermissionModal();
     }
   });
 }
@@ -762,7 +786,8 @@ function toggleVoiceInput() {
   if (isListening) {
     stopVoiceInput();
   } else {
-    startVoiceInput();
+    // Show microphone permission modal first
+    openMicPermissionModal();
   }
 }
 
@@ -845,6 +870,27 @@ function openUploadModal() {
 function closeUploadModal() {
   const modal = document.getElementById('uploadModal');
   modal.classList.remove('show');
+}
+
+// Open microphone permission modal
+function openMicPermissionModal() {
+  const modal = document.getElementById('micPermissionModal');
+  modal.classList.add('show');
+}
+
+// Close microphone permission modal
+function closeMicPermissionModal() {
+  const modal = document.getElementById('micPermissionModal');
+  modal.classList.remove('show');
+}
+
+// Enable microphone and start voice input
+function enableMicrophone() {
+  closeMicPermissionModal();
+  // Small delay to ensure modal is closed before starting recognition
+  setTimeout(() => {
+    startVoiceInput();
+  }, 100);
 }
 
 // Handle file upload

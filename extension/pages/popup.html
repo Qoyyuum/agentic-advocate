@@ -301,6 +301,36 @@
     </div>
   </div>
 
+  <!-- Microphone Permission Modal -->
+  <div class="modal" id="micPermissionModal" role="dialog" aria-labelledby="micPermissionModalTitle" aria-modal="true">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h3 class="modal-title" id="micPermissionModalTitle">Enable Microphone Access</h3>
+        <button class="close-btn" id="micPermissionCloseBtn" title="Close" aria-label="Close">
+          <div class="close-icon" id="micPermissionCloseIcon"></div>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="mic-permission-content">
+          <div class="mic-icon-large">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </div>
+          <p class="help-text">Agentic Advocate needs access to your microphone to enable voice input.</p>
+          <p class="help-text">Click "Enable Microphone" below and allow access when your browser prompts you.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-secondary" id="micPermissionCancelBtn">Cancel</button>
+        <button class="modal-btn neon-btn" id="micPermissionEnableBtn">Enable Microphone</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Configuration Modal -->
   <div class="modal" id="configModal" role="dialog" aria-labelledby="configModalTitle" aria-modal="true">
     <div class="modal-content glass-panel">
