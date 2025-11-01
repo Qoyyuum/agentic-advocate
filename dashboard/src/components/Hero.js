@@ -59,14 +59,18 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
+            <a href="https://github.com/Qoyyuum/agentic-advocate/releases/download/v1.0.0-beta/extension-v1.0.0-beta.zip" target="_blank" rel="noopener noreferrer">
             <Button variant="neon" size="lg" className="gap-2">
               <Download className="w-5 h-5" />
               Install Extension
             </Button>
+            </a>
+            <a href="/documentation">
             <Button variant="glass" size="lg" className="gap-2">
               <BookOpen className="w-5 h-5" />
               Learn More
             </Button>
+            </a>
           </motion.div>
 
           <motion.div

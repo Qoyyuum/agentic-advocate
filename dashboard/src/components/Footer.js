@@ -58,7 +58,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/adi0900/Google_Chrome25"
+                  href="https://github.com/Qoyyuum/agentic-advocate"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-muted-foreground hover:text-neon-cyan transition-colors group"
@@ -132,7 +132,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center space-x-6">
             <a
-              href="https://github.com/adi0900/Google_Chrome25"
+              href="https://github.com/Qoyyuum/agentic-advocate"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-neon-cyan transition-colors"

@@ -66,14 +66,18 @@ export default function CTA() {
             transition={{ duration: 0.5, delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8"
           >
+            <a href="https://github.com/Qoyyuum/agentic-advocate/releases/download/v1.0.0-beta/extension-v1.0.0-beta.zip" target="_blank" rel="noopener noreferrer">
             <Button variant="neon" size="lg" className="gap-2 text-base">
               <Download className="w-5 h-5" />
               Install Now - It's Free
             </Button>
+            </a>
+            <a href="https://github.com/Qoyyuum/agentic-advocate" target="_blank" rel="noopener noreferrer">
             <Button variant="glass" size="lg" className="gap-2 text-base">
               <Github className="w-5 h-5" />
               View on GitHub
             </Button>
+            </a>
           </motion.div>
 
           <motion.div
