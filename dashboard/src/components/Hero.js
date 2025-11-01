@@ -65,10 +65,12 @@ export default function Hero() {
               Install Extension
             </Button>
             </a>
+            <a href="/documentation">
             <Button variant="glass" size="lg" className="gap-2">
               <BookOpen className="w-5 h-5" />
               Learn More
             </Button>
+            </a>
           </motion.div>
 
           <motion.div
